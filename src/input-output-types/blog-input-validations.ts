@@ -11,14 +11,14 @@ export const descriptionValidation = body("description")
     .isString()
     .withMessage("Description should be a text")
     .trim()
-    .isLength({ min: 10, max: 500 })
-    .withMessage("Wrong description size, it can't be less than 10 and more than 500 symbols")
+    .isLength({ min: 1, max: 500 })
+    .withMessage("Wrong description size, it can't be less than 1 and more than 500 symbols")
 
 export const websiteURLValidation = body("websiteUrl")
     .isString()
     .withMessage("URL should be a string")
     .trim()
-    .isLength({ min: 10, max: 100 })
+    .isLength({ min: 1, max: 100 })
     .withMessage("URL is to short or to long, it can't be empty or more than 100 symbols")
     .custom(value => {
         const pattern = /^https:\/\/([a-zA-Z0-9_-]+\.)+[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*\/?$/;

@@ -50,7 +50,7 @@ blogsRouter.put("/:id", authMiddleware , blogInputsValidation, inputValidationMi
     const isUpdated = blogsRepository.updateBlog(req.params.id, req.body.name, req.body.description, req.body.websiteUrl);
     if (isUpdated){
         const product = blogsRepository.findBlogById(req.params.id);
-        res.send(product);
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204).send(product);
     } else {
         res.send(HTTP_STATUSES.NOT_FOUND_404);
     }
