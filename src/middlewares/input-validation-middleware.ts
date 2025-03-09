@@ -7,8 +7,8 @@ const formatErrors = (error: ValidationError) :ValidationErrorsType => {
     const expressError = error as unknown as FieldValidationError;
 
     return {
+        message: expressError.msg,
         field: expressError.path,
-        message: expressError.msg
     }
 }
 
