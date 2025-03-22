@@ -6,12 +6,19 @@ import {ObjectId} from "mongodb";
 
 export const blogsRepository = {
     async findBlogs() : Promise<BlogDBType[]> {
-        return blogCollection.find().toArray()
+        const blogs =  await blogCollection.find().toArray()
+        return blogs.map(blog => ({
+            id: blog._id.toString(),
+            name: blog.name,
+            description: blog.description,
+            websiteUrl: blog.websiteUrl,
+            createdAt: blog.createdAt,
+            isMembership: blog.isMembership,
+        }));
     },
 
     async createBlog(body: InputBlogType) {
         const newBlog = {
-            id: String(Date.now() + Math.random()),
             name: body.name,
             description: body.description,
             websiteUrl: body.websiteUrl,
@@ -25,7 +32,7 @@ export const blogsRepository = {
     },
 
     async findBlog(id: string) {
-        return await blogCollection.findOne({ id });
+        const blog =  await blogCollection.findOne({ id });
     },
 
     async findBlogById(_id: ObjectId) {
