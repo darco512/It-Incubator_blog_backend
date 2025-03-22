@@ -10,12 +10,16 @@ export const db = {
             "name": "Tony",
             "description": "My personal blog",
             "websiteUrl": "https://www.tony.org/",
+            "createdAt": "",
+            "isMembership": false
         },
         {
             "id": "12321",
             "name": "Tor",
             "description": "asdasfasf",
             "websiteUrl": "https://www.tor.org/",
+            "createdAt": "",
+            "isMembership": false
         },
     ],
     posts: [

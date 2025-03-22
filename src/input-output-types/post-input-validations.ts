@@ -1,5 +1,6 @@
 import {body} from "express-validator";
-import {db} from '../db/db'
+import {blogsRepository} from "../repositories/blogs-repository";
+import {ObjectId} from "mongodb";
 
 export const titleValidation = body("title")
     .isString()
@@ -23,18 +24,18 @@ export const contentValidation = body("content")
     .withMessage("Content is to small or to long long, it can't be less than 1 or more than 1000 symbols")
 
 
-export const blogIDValidation = body("blogId")
-    .isString()
-    .withMessage("Blog ID should be a string")
-    .custom( id => {
-        return db.blogs.find((x) => x.id === id)
-    })
-    .withMessage("Blog with such id doesn't exist")
+// export const blogIDValidation = body("blogId")
+//     .isString()
+//     .withMessage("Blog ID should be a string")
+//     .custom( id => {
+//         return await blogsRepository.findBlogById(new ObjectId(id))
+//     })
+//     .withMessage("Blog with such id doesn't exist")
 
 export const postInputsValidation = [
     titleValidation,
     shortDescriptionValidation,
     contentValidation,
-    blogIDValidation
+    // blogIDValidation
 ]
 

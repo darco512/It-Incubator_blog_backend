@@ -1,0 +1,31 @@
+import { Collection, MongoClient } from 'mongodb';
+import {BlogDBType, PostDBType} from "../input-output-types/types";
+import {SETTINGS} from "../settings";
+import * as dotenv from "dotenv";
+dotenv.config();
+
+
+
+export let blogCollection: Collection<BlogDBType>
+export let postCollection: Collection<PostDBType>
+
+export async function runDB(url: string): Promise<boolean> {
+    let client = new MongoClient(url)
+    let db = client.db(SETTINGS.DB_NAME)
+
+    blogCollection = db.collection<BlogDBType>(SETTINGS.PATH.BLOGS)
+    postCollection = db.collection<PostDBType>(SETTINGS.PATH.POSTS)
+
+    try {
+        await client.connect()
+        await db.command({ping: 1});
+        console.log("Database Connected");
+        return true;
+    }
+    catch (e) {
+        console.log(e);
+        await client.close();
+        return false;
+    }
+}
+

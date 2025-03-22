@@ -1,49 +1,48 @@
-import {db} from "../db/db";
+import {blogCollection} from "../db/mongo-db";
+import {BlogDBType, InputBlogType} from "../input-output-types/types";
+import {ObjectId} from "mongodb";
 
 
 
 export const blogsRepository = {
-    findBlogs() {
-            return db.blogs
+    async findBlogs() : Promise<BlogDBType[]> {
+        return blogCollection.find().toArray()
     },
 
-    createBlog(name: string, description: string, websiteUrl: string) {
+    async createBlog(body: InputBlogType) {
         const newBlog = {
-            id: new Date().toString(),
-            name: name,
-            description: description,
-            websiteUrl: websiteUrl,
+            name: body.name,
+            description: body.description,
+            websiteUrl: body.websiteUrl,
+            createdAt: new Date().toISOString(),
+            isMembership: false,
         }
-        db.blogs.push(newBlog);
 
-        return newBlog;
+        const res = await blogCollection.insertOne(newBlog);
+
+        return res.insertedId;
     },
 
-    findBlogById(id: string) {
-        return db.blogs.find((x) => x.id === id);
+    async findBlog(_id: ObjectId) {
+        return await blogCollection.findOne({ _id });
+    },
+
+    async findBlogById(_id: ObjectId) {
+        return await blogCollection.findOne({ _id });
     },
 
 
-    updateBlog(id: string, name: string, description: string, websiteUrl: string) {
-        let blog = db.blogs.find((x) => x.id === id);
-        if (blog){
-            blog.name = name
-            blog.description = description
-            blog.websiteUrl = websiteUrl;
-            return true;
-        } else {
-            return false;
-        }
+    async updateBlog(_id: ObjectId, body: InputBlogType) {
+        const res = await blogCollection.updateOne(
+            { _id },
+            { $set: { ...body } }
+        )
+        return res.matchedCount === 1;
     },
 
-    deleteBlog(id: string) {
-        for (let i= 0; i < db.blogs.length; i++) {
-            if (db.blogs[i].id === id) {
-                db.blogs.splice(i, 1);
-                return true;
-            }
-        }
-        return false;
+    async deleteBlog(_id: ObjectId) {
+        const result = await blogCollection.deleteOne({_id});
+        return result.deletedCount === 1
     }
 
  }
