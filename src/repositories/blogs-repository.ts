@@ -11,6 +11,7 @@ export const blogsRepository = {
 
     async createBlog(body: InputBlogType) {
         const newBlog = {
+            id: String(Date.now() + Math.random()),
             name: body.name,
             description: body.description,
             websiteUrl: body.websiteUrl,
@@ -23,8 +24,8 @@ export const blogsRepository = {
         return res.insertedId;
     },
 
-    async findBlog(_id: ObjectId) {
-        return await blogCollection.findOne({ _id });
+    async findBlog(id: string) {
+        return await blogCollection.findOne({ id });
     },
 
     async findBlogById(_id: ObjectId) {
@@ -32,16 +33,16 @@ export const blogsRepository = {
     },
 
 
-    async updateBlog(_id: ObjectId, body: InputBlogType) {
+    async updateBlog(id: string, body: InputBlogType) {
         const res = await blogCollection.updateOne(
-            { _id },
+            { id },
             { $set: { ...body } }
         )
         return res.matchedCount === 1;
     },
 
-    async deleteBlog(_id: ObjectId) {
-        const result = await blogCollection.deleteOne({_id});
+    async deleteBlog(id: string) {
+        const result = await blogCollection.deleteOne({id});
         return result.deletedCount === 1
     }
 
