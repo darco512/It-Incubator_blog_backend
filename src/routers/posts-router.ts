@@ -28,7 +28,8 @@ postsRouter.post(
         const blog = await blogsRepository.findBlogById(new ObjectId(req.body.blogId));
 
         if (blog) {
-            const newPost = await postsRepository.createPost(req.body.title, req.body.shortDescription, req.body.content, req.body.blogId, blog.name);
+            const newPostId = await postsRepository.createPost(req.body.title, req.body.shortDescription, req.body.content, req.body.blogId, blog.name);
+            const newPost = await postsRepository.findPostById(newPostId);
             res.status(HTTP_STATUSES.CREATED_201).json(newPost); // No explicit return
         } else {
             res.status(HTTP_STATUSES.BAD_REQUEST_400)

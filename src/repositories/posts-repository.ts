@@ -54,7 +54,7 @@ export const postsRepository = {
 
     async updatePost(_id: ObjectId, title: string, shortDescription: string, content: string, blogId: string, blogName: string) {
         const res = await postCollection.updateOne(
-            {_id},
+            { _id },
             {
                 $set: {
                     title: title,

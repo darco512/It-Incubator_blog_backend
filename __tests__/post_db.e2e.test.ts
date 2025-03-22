@@ -115,7 +115,7 @@ describe('/posts', () => {
             .send(secondPost)
             .expect(201)
 
-        const id = res.body;
+        const id = res.body.id;
         console.log(res.body)
 
         await req
@@ -170,7 +170,7 @@ describe('/posts', () => {
             .send(secondPost)
             .expect(201)
 
-        const id = res.body;
+        const id = res.body.id;
 
         const updatedPost: InputPostType = {
             title: 'new title',
