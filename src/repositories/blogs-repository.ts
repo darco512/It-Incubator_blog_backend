@@ -32,11 +32,11 @@ export const blogsRepository = {
     },
 
     async findBlog(id: string) {
-        const blog =  await blogCollection.findOne({ id });
+        return  await blogCollection.findOne({ id });
     },
 
     async findBlogById(_id: ObjectId) {
-        const blogs =  await blogCollection.find().toArray()
+        const blogs =  await blogCollection.find({ _id })
         return blogs.map(blog => ({
             id: blog._id.toString(),
             name: blog.name,
