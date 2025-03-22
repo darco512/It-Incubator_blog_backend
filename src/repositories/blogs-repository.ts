@@ -52,16 +52,16 @@ export const blogsRepository = {
     },
 
 
-    async updateBlog(id: string, body: InputBlogType) {
+    async updateBlog(_id: ObjectId, body: InputBlogType) {
         const res = await blogCollection.updateOne(
-            { id },
+            { _id },
             { $set: { ...body } }
         )
         return res.matchedCount === 1;
     },
 
-    async deleteBlog(id: string) {
-        const result = await blogCollection.deleteOne({id});
+    async deleteBlog(_id: ObjectId) {
+        const result = await blogCollection.deleteOne({_id});
         return result.deletedCount === 1
     }
 

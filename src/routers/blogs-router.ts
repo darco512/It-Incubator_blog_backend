@@ -29,9 +29,9 @@ blogsRouter.post(
 );
 
 
-blogsRouter.get("/:id", async (req: Request, res: Response) => {
+blogsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, res: Response) => {
 
-    let blog = await blogsRepository.findBlog(req.params.id);
+    let blog = await blogsRepository.findBlogById(new ObjectId(req.params.id));
     if (blog){
         res.send(blog);
     } else {
@@ -39,8 +39,8 @@ blogsRouter.get("/:id", async (req: Request, res: Response) => {
     }
 })
 
-blogsRouter.delete("/:id", authMiddleware , async (req: Request, res: Response) => {
-    const isDeleted = await blogsRepository.deleteBlog(req.params.id);
+blogsRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
+    const isDeleted = await blogsRepository.deleteBlog(new ObjectId(req.params.id));
     if (isDeleted) {
         res.send(HTTP_STATUSES.NO_CONTENT_204);
     } else{
@@ -49,8 +49,8 @@ blogsRouter.delete("/:id", authMiddleware , async (req: Request, res: Response) 
 })
 
 
-blogsRouter.put("/:id", authMiddleware , blogInputsValidation, inputValidationMiddleware, async (req: Request, res: Response) => {
-    const isUpdated = await blogsRepository.updateBlog(req.params.id, req.body);
+blogsRouter.put("/:id", authMiddleware , blogInputsValidation, inputValidationMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
+    const isUpdated = await blogsRepository.updateBlog(new ObjectId(req.params.id), req.body);
     if (isUpdated){
         res.send(HTTP_STATUSES.NO_CONTENT_204);
     } else {
