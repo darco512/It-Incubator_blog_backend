@@ -36,7 +36,15 @@ export const blogsRepository = {
     },
 
     async findBlogById(_id: ObjectId) {
-        return await blogCollection.findOne({ _id });
+        const blogs =  await blogCollection.find().toArray()
+        return blogs.map(blog => ({
+            id: blog._id.toString(),
+            name: blog.name,
+            description: blog.description,
+            websiteUrl: blog.websiteUrl,
+            createdAt: blog.createdAt,
+            isMembership: blog.isMembership,
+        }));
     },
 
 
