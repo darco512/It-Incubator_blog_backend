@@ -6,7 +6,16 @@ import {ObjectId} from "mongodb";
 
 export const postsRepository = {
     async findPosts(): Promise<PostDBType[]> {
-        return postCollection.find().toArray()
+        const posts =  await postCollection.find().toArray()
+        return posts.map(post => ({
+            id: post._id.toString(),
+            title: post.title,
+            shortDescription: post.shortDescription,
+            content: post.content,
+            blogId: post.blogId,
+            blogName: post.blogName,
+            createdAt: post.createdAt,
+        }));
     },
 
     async createPost(title: string, shortDescription: string, content: string, blogId: string, blogName: string) {
@@ -26,7 +35,20 @@ export const postsRepository = {
     },
 
     async findPostById(_id: ObjectId) {
-        return await postCollection.findOne({_id});
+        const post = await postCollection.findOne({_id})
+        if (post) {
+            return {
+                id: post._id.toString(),
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt,
+            };
+        } else {
+            return null; // Return null if no blog is found
+        }
     },
 
 
