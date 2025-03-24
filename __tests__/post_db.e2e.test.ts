@@ -22,7 +22,15 @@ describe('/posts', () => {
             .get(SETTINGS.PATH.POSTS)
             .expect(200) // проверяем наличие эндпоинта
 
-        expect(res.body.length).toBe(0) // проверяем ответ эндпоинта
+        const expected = {
+            items: expect.any(Array),
+            page: expect.any(Number),
+            pageSize: expect.any(Number),
+            pageCount: expect.any(Number),
+            totalCount: expect.any(Number),
+        };
+
+        expect(res.body).toEqual(expected) // проверяем ответ эндпоинта
     })
 
     const newBlog :InputBlogType = {
@@ -81,6 +89,25 @@ describe('/posts', () => {
 
         console.log(res.body)
 
+    })
+
+
+    it('should find blog posts', async () => {
+
+        const res = await req
+            .get(`${SETTINGS.PATH.BLOGS}/${createdBlog.id}/posts`)
+            .expect(200)
+        console.log(res.body)
+
+        const expected = {
+            items: expect.any(Array),
+            page: expect.any(Number),
+            pageSize: expect.any(Number),
+            pageCount: expect.any(Number),
+            totalCount: expect.any(Number),
+        };
+
+        expect(res.body).toEqual(expected)
     })
 
 

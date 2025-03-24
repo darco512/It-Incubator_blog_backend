@@ -1,30 +1,16 @@
 import {blogCollection} from "../db/mongo-db";
-import {BlogDBType, InputBlogType} from "../input-output-types/types";
-import {ObjectId} from "mongodb";
+import {BlogDBType, InputBlogType, OutputBlogType} from "../input-output-types/types";
+import {ObjectId, SortDirection} from "mongodb";
 
 
 
 export const blogsRepository = {
     async findBlogs() : Promise<BlogDBType[]> {
-        const blogs =  await blogCollection.find().toArray()
-        return blogs.map(blog => ({
-            id: blog._id.toString(),
-            name: blog.name,
-            description: blog.description,
-            websiteUrl: blog.websiteUrl,
-            createdAt: blog.createdAt,
-            isMembership: blog.isMembership,
-        }));
+        return await blogCollection.find().toArray()
     },
 
-    async createBlog(body: InputBlogType) {
-        const newBlog = {
-            name: body.name,
-            description: body.description,
-            websiteUrl: body.websiteUrl,
-            createdAt: new Date().toISOString(),
-            isMembership: false,
-        }
+
+    async createBlog(newBlog: any) {
 
         const res = await blogCollection.insertOne(newBlog);
 
@@ -36,19 +22,7 @@ export const blogsRepository = {
     },
 
     async findBlogById(_id: ObjectId) {
-        const blog =  await blogCollection.findOne({ _id })
-        if (blog) {
-            return {
-                id: blog._id.toString(), // Convert ObjectId to string and rename to "id"
-                name: blog.name,
-                description: blog.description,
-                websiteUrl: blog.websiteUrl,
-                createdAt: blog.createdAt,
-                isMembership: blog.isMembership,
-            };
-        } else {
-            return null; // Return null if no blog is found
-        }
+        return await blogCollection.findOne({ _id })
     },
 
 

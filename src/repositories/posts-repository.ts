@@ -1,33 +1,14 @@
-import {db} from "../db/db";
-import {BlogDBType, PostDBType} from "../input-output-types/types";
-import {blogCollection, postCollection} from "../db/mongo-db";
+import {UpdatePostType, PostDBType} from "../input-output-types/types";
+import { postCollection} from "../db/mongo-db";
 import {ObjectId} from "mongodb";
 
 
 export const postsRepository = {
     async findPosts(): Promise<PostDBType[]> {
-        const posts =  await postCollection.find().toArray()
-        return posts.map(post => ({
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: post.blogName,
-            createdAt: post.createdAt,
-        }));
+        return await postCollection.find().toArray()
     },
 
-    async createPost(title: string, shortDescription: string, content: string, blogId: string, blogName: string) {
-
-        const newPost = {
-            title: title,
-            shortDescription: shortDescription,
-            content: content,
-            blogId: blogId,
-            blogName: blogName,
-            createdAt: new Date().toISOString(),
-        }
+    async createPost(newPost: any) {
 
         const res = await postCollection.insertOne(newPost);
 
@@ -35,35 +16,14 @@ export const postsRepository = {
     },
 
     async findPostById(_id: ObjectId) {
-        const post = await postCollection.findOne({_id})
-        if (post) {
-            return {
-                id: post._id.toString(),
-                title: post.title,
-                shortDescription: post.shortDescription,
-                content: post.content,
-                blogId: post.blogId,
-                blogName: post.blogName,
-                createdAt: post.createdAt,
-            };
-        } else {
-            return null; // Return null if no blog is found
-        }
+        return await postCollection.findOne({_id})
     },
 
 
-    async updatePost(_id: ObjectId, title: string, shortDescription: string, content: string, blogId: string, blogName: string) {
+    async updatePost(_id: ObjectId, updatedPost: UpdatePostType) {
         const res = await postCollection.updateOne(
             { _id },
-            {
-                $set: {
-                    title: title,
-                    shortDescription: shortDescription,
-                    content: content,
-                    blogId: blogId,
-                    blogName: blogName,
-                }
-            }
+            {$set: {...updatedPost}}
         )
         return res.matchedCount === 1;
     },
