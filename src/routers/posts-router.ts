@@ -40,7 +40,7 @@ postsRouter.post(
             const newPost = await postsService.findPostById(newPostId);
             res.status(HTTP_STATUSES.CREATED_201).json(newPost); // No explicit return
         } else {
-            res.status(HTTP_STATUSES.BAD_REQUEST_400)
+            res.status(HTTP_STATUSES.NOT_FOUND_404)
         }
     }
 );

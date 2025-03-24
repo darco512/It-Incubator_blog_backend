@@ -56,7 +56,7 @@ blogsRouter.get("/:id/posts", async (req: Request, res: Response) => {
         const result = postsQueriesRepository.mapPaginationViewModel({postsCounts, foundPosts, pageSize, pageNumber})
         res.status(HTTP_STATUSES.OK_200).json(result)
     }
-    res.status(HTTP_STATUSES.NOT_FOUND_404)
+    res.send(HTTP_STATUSES.NOT_FOUND_404)
 })
 
 
@@ -86,7 +86,7 @@ blogsRouter.post(
             const newPost = await postsService.findPostById(newPostId);
             res.status(HTTP_STATUSES.CREATED_201).json(newPost); // No explicit return
         } else {
-            res.status(HTTP_STATUSES.BAD_REQUEST_400)
+            res.send(HTTP_STATUSES.NOT_FOUND_404)
         }
     }
 );

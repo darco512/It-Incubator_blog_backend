@@ -61,7 +61,7 @@ export const postsQueriesRepository = {
         pageNumber: number
     }) {
         return {
-            pageCount: Math.ceil(dto.postsCounts / dto.pageSize),
+            pagesCount: Math.ceil(dto.postsCounts / dto.pageSize),
             page: dto.pageNumber,
             pageSize: dto.pageSize,
             totalCount: dto.postsCounts,

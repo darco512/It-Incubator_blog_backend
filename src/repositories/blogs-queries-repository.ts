@@ -53,7 +53,7 @@ export const blogsQueriesRepository = {
         pageNumber: number
     }) {
         return {
-            pageCount: Math.ceil(dto.blogsCounts / dto.pageSize),
+            pagesCount: Math.ceil(dto.blogsCounts / dto.pageSize),
             page: dto.pageNumber,
             pageSize: dto.pageSize,
             totalCount: dto.blogsCounts,
