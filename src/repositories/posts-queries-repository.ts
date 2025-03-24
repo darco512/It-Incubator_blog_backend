@@ -17,7 +17,7 @@ export const postsQueriesRepository = {
         const filter: any = {}
         const {pageNumber, pageSize, sortBy, sortDirection, searchNameTerm, blogId} = dto;
         if (searchNameTerm) {
-            filter.name = {$regex: searchNameTerm, $options: 'i'};
+            filter.title = {$regex: searchNameTerm, $options: 'i'};
         }
         if (blogId) {
             filter.blogId = {$regex: blogId, $options: 'i'};
@@ -34,7 +34,7 @@ export const postsQueriesRepository = {
     async getPostsCount(searchNameTerm: string | null, blogId: string | null): Promise<number> {
         const filter: any = {}
         if (searchNameTerm) {
-            filter.name = {$regex: searchNameTerm, $options: 'i'};
+            filter.title = {$regex: searchNameTerm, $options: 'i'};
         }
         if (blogId) {
             filter.blogId = {$regex: blogId, $options: 'i'};
