@@ -5,7 +5,7 @@ import {authMiddleware} from "../middlewares/auth-middleware";
 import {blogInputsValidation} from "../input-output-types/blog-input-validations";
 import {HTTP_STATUSES} from "../utils";
 import {objectIdValidationMiddleware} from "../middlewares/ObjectId-validation-middleware";
-import {ObjectId} from "mongodb";
+import {ObjectId, SortDirection} from "mongodb";
 import {paginationQueries} from "../helpers/paginations-values";
 import {blogsQueriesRepository} from "../repositories/blogs-queries-repository";
 import {postsQueriesRepository} from "../repositories/posts-queries-repository";
@@ -19,13 +19,13 @@ export const blogsRouter = Router();
 
 blogsRouter.get("/", async (req: Request, res: Response) => {
 
-    // let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1;
-    // let pageSize = req.query.pageSize ? +req.query.pageSize : 10;
-    // let sortBy = req.query.sortBy ? req.query.sortBy.toString : "createdAt";
-    // let sortDirection :SortDirection = req.query.sortDirection && req.query.sortDirection === 'asc' ? 'asc' : 'desc';
-    // let searchNameTerm = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null;
+    let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1;
+    let pageSize = req.query.pageSize ? +req.query.pageSize : 10;
+    let sortBy = req.query.sortBy ? req.query.sortBy.toString() : "createdAt";
+    let sortDirection :SortDirection = req.query.sortDirection && req.query.sortDirection === 'asc' ? 'asc' : 'desc';
+    let searchNameTerm = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null;
 
-    const {pageNumber, pageSize, sortBy, sortDirection, searchNameTerm} = paginationQueries(req)
+    // const {pageNumber, pageSize, sortBy, sortDirection, searchNameTerm, blogId} = paginationQueries(req)
 
     const foundBlogs = await blogsQueriesRepository.findBlogs({pageNumber, pageSize, sortBy, sortDirection, searchNameTerm});
     const blogsCounts  = await blogsQueriesRepository.getBlogsCount(searchNameTerm)
