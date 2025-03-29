@@ -2,11 +2,11 @@ import {body} from "express-validator";
 
 export const loginOrEmailValidation = body("loginOrEmail")
     .isString()
-    .withMessage("Name should be string")
+    .withMessage("loginOrEmail should be string")
 
 export const passwordValidation = body("password")
     .isString()
-    .withMessage("Description should be a string")
+    .withMessage("password should be a string")
 
 
 
