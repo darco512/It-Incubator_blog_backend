@@ -1,4 +1,4 @@
-import {req} from './test-helpers'
+import {req, users} from './test-helpers'
 import {SETTINGS} from "../src/settings";
 import {HTTP_STATUSES} from "../src/utils";
 import {
@@ -64,6 +64,8 @@ describe('/users', () => {
 
 
 
+
+
     it('should login', async () => {
         const authData = {
             loginOrEmail: user.email,
@@ -102,5 +104,17 @@ describe('/users', () => {
             .set('Authorization', `Basic ${base64Credentials}`)
             .expect(HTTP_STATUSES.NO_CONTENT_204)
     })
+
+    it('should create users', async () => {
+
+        // Use Promise.all to wait for all requests to complete
+        await Promise.all(users.map(async (user) => {
+            await req
+                .post(SETTINGS.PATH.USERS)
+                .set('Authorization', `Basic ${base64Credentials}`)
+                .send(user)
+                .expect(201)
+        }));
+    });
 
 })

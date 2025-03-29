@@ -17,10 +17,10 @@ export const usersQueriesRepository = {
         const filter: any = {}
         const {pageNumber, pageSize, sortBy, sortDirection, searchLoginTerm, searchEmailTerm} = dto;
         if (searchLoginTerm) {
-            filter.login = {$regex: searchLoginTerm, $options: 'i'};
+            // filter.login = {$regex: searchLoginTerm, $options: 'i'};
         }
         if (searchEmailTerm) {
-            filter.email = {$regex: searchEmailTerm, $options: 'i'};
+            // filter.email = {$regex: searchEmailTerm, $options: 'i'};
         }
 
         return await userCollection
@@ -61,10 +61,10 @@ export const usersQueriesRepository = {
     async getUsersCount(searchLoginTerm: string | null, searchEmailTerm: string | null): Promise<number> {
         const filter: any = {}
         if (searchLoginTerm) {
-            filter.login = {$regex: searchLoginTerm, $options: 'i'};
+            // filter.login = {$regex: searchLoginTerm, $options: 'i'};
         }
         if (searchEmailTerm) {
-            filter.email = {$regex: searchEmailTerm, $options: 'i'};
+            // filter.email = {$regex: searchEmailTerm, $options: 'i'};
         }
         return userCollection.countDocuments(filter)
     },
