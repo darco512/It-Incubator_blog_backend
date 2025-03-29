@@ -29,6 +29,12 @@ export type InputPostType = {
     blogId: string
 }
 
+export type UserInputType = {
+    login: string
+    password: string
+    email: string
+}
+
 export type BlogType = {
     id: string
     name: string
@@ -65,5 +71,29 @@ export type PostDBType = {
     content: string
     blogId: string
     blogName: string
+    createdAt: string
+}
+
+export type UserDBType = {
+    _id: ObjectId
+    login: string;
+    email: string;
+    passwordHash: string;
+    passwordSalt: string;
+    createdAt: string;
+}
+
+export type InputUserType = {
+    login: string;
+    email: string;
+    passwordHash: string;
+    passwordSalt: string;
+    createdAt: string;
+}
+
+export type UserViewModel = {
+    id: string
+    login: string
+    email: string
     createdAt: string
 }

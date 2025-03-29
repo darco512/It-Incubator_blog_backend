@@ -29,7 +29,7 @@ export const postsService = {
             createdAt: new Date().toISOString(),
         }
 
-       return  await postsRepository.createPost(newPost);
+       return postsRepository.createPost(newPost);
     },
 
     async findPostById(_id: ObjectId) {

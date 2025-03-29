@@ -10,7 +10,9 @@ export const SETTINGS = {
     PATH: {
         BLOGS: '/blogs',
         POSTS: '/posts',
-        TESTS: '/testing/all-data'
+        TESTS: '/testing/all-data',
+        AUTH: '/auth',
+        USERS: '/users',
     },
     MONGO_URL: process.env.MONGO_URL || "mongodb://0.0.0.0:27017",
     DB_NAME: process.env.DB_NAME || "test"
