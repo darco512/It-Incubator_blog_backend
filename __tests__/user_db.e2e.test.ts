@@ -117,4 +117,22 @@ describe('/users', () => {
         }));
     });
 
+    it('should found users', async () => {
+
+        const res = await req
+            .get(SETTINGS.PATH.USERS + '?pageSize=15&pageNumber=1&searchLoginTerm=seR&searchEmailTerm=.com&sortDirection=asc&sortBy=login')
+            .set('Authorization', `Basic ${base64Credentials}`)
+            .expect(HTTP_STATUSES.OK_200) // проверяем наличие эндпоинта
+
+        const expected = {
+            items: expect.any(Array),
+            page: expect.any(Number),
+            pageSize: expect.any(Number),
+            pagesCount: expect.any(Number),
+            totalCount: expect.any(Number),
+        };
+
+        expect(res.body).toEqual(expected) // проверяем ответ эндпоинта
+    });
+
 })

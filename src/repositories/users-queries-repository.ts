@@ -14,13 +14,15 @@ export const usersQueriesRepository = {
         searchEmailTerm: string | null
     }): Promise<UserDBType[]> {
 
-        const filter: any = {}
+
+
+
         const {pageNumber, pageSize, sortBy, sortDirection, searchLoginTerm, searchEmailTerm} = dto;
-        if (searchLoginTerm) {
-            // filter.login = {$regex: searchLoginTerm, $options: 'i'};
-        }
-        if (searchEmailTerm) {
-            // filter.email = {$regex: searchEmailTerm, $options: 'i'};
+        const searchByLoginTerms = searchLoginTerm ? {login: {$regex: searchLoginTerm, $options: 'i'}} : {}
+        const searchByEmailTerms = searchEmailTerm ? {email: {$regex: searchEmailTerm, $options: 'i'}} : {}
+        const filter = {
+            ...searchByLoginTerms,
+            ...searchByEmailTerms,
         }
 
         return await userCollection
@@ -59,12 +61,12 @@ export const usersQueriesRepository = {
     },
 
     async getUsersCount(searchLoginTerm: string | null, searchEmailTerm: string | null): Promise<number> {
-        const filter: any = {}
-        if (searchLoginTerm) {
-            // filter.login = {$regex: searchLoginTerm, $options: 'i'};
-        }
-        if (searchEmailTerm) {
-            // filter.email = {$regex: searchEmailTerm, $options: 'i'};
+
+        const searchByLoginTerms = searchLoginTerm ? {login: {$regex: searchLoginTerm, $options: 'i'}} : {}
+        const searchByEmailTerms = searchEmailTerm ? {email: {$regex: searchEmailTerm, $options: 'i'}} : {}
+        const filter = {
+            ...searchByLoginTerms,
+            ...searchByEmailTerms,
         }
         return userCollection.countDocuments(filter)
     },
