@@ -20,10 +20,8 @@ export const usersQueriesRepository = {
         const {pageNumber, pageSize, sortBy, sortDirection, searchLoginTerm, searchEmailTerm} = dto;
         const searchByLoginTerms = searchLoginTerm ? {login: {$regex: searchLoginTerm, $options: 'i'}} : {}
         const searchByEmailTerms = searchEmailTerm ? {email: {$regex: searchEmailTerm, $options: 'i'}} : {}
-        const filter = {
-            ...searchByLoginTerms,
-            ...searchByEmailTerms,
-        }
+        const filter = { $or: [searchByLoginTerms, searchByEmailTerms] };
+
 
         return await userCollection
             .find(filter)
@@ -64,10 +62,7 @@ export const usersQueriesRepository = {
 
         const searchByLoginTerms = searchLoginTerm ? {login: {$regex: searchLoginTerm, $options: 'i'}} : {}
         const searchByEmailTerms = searchEmailTerm ? {email: {$regex: searchEmailTerm, $options: 'i'}} : {}
-        const filter = {
-            ...searchByLoginTerms,
-            ...searchByEmailTerms,
-        }
+        const filter = { $or: [searchByLoginTerms, searchByEmailTerms] };
         return userCollection.countDocuments(filter)
     },
 
