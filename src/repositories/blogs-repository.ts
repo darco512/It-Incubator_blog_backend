@@ -1,6 +1,6 @@
 import {blogCollection} from "../db/mongo-db";
-import {BlogDBType, InputBlogType, OutputBlogType} from "../input-output-types/types";
-import {ObjectId, SortDirection} from "mongodb";
+import {BlogDBInputType, BlogDBType, InputBlogType, OutputBlogType} from "../input-output-types/types";
+import {ObjectId, SortDirection, WithId} from "mongodb";
 
 
 
@@ -10,9 +10,9 @@ export const blogsRepository = {
     },
 
 
-    async createBlog(newBlog: any) {
+    async createBlog(newBlog: BlogDBInputType) {
 
-        const res = await blogCollection.insertOne(newBlog);
+        const res = await blogCollection.insertOne(newBlog as BlogDBType);
 
         return res.insertedId;
     },

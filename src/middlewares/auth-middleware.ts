@@ -1,31 +1,24 @@
 import {Request, Response, NextFunction} from "express";
+import {jwtService} from "../application/jwt-service";
+import {usersService} from "../domain/users-service";
 
 export const ADMIN_USERNAME = "admin";
 export const ADMIN_PASSWORD = "qwerty";
 
 
-export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-    const authorization = req.headers['authorization'] as string;
-    if (!authorization) {
+export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.headers.authorization) {
         res.sendStatus(401);
         return;
     }
 
-    const [authType, token] = authorization.split(' ');
+    const token = req.headers.authorization.split(' ')[1]
 
-    if (authType !== 'Basic') {
-        res.sendStatus(401);
-        return;
+    const userId = await jwtService.getUserByToken(token)
+
+    if (userId) {
+        req.user = await usersService.findUserById(userId)
+        next()
     }
-
-    const credentials = Buffer.from(token, 'base64').toString('utf-8');
-
-    const [username, password] = credentials.split(':');
-
-    if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
-        res.sendStatus(401);
-        return;
-    }
-
-    next();
+    res.send(401)
 }

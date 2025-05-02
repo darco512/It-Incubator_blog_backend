@@ -3,3 +3,4 @@ dist/
 .idea
 .env
 covarage
+src/middlewares/login-email-uniqueness-middleware.ts

@@ -35,6 +35,10 @@ export type UserInputType = {
     email: string
 }
 
+export type InputCommentType = {
+    content: string
+}
+
 export type BlogType = {
     id: string
     name: string
@@ -55,13 +59,24 @@ export type PostType = {
 }
 
 
-export type BlogDBType = {
-    _id: ObjectId
+
+export type BlogDBInputType = {
     name: string
     description: string
     websiteUrl: string
     createdAt: string
     isMembership: boolean
+}
+
+export type BlogDBType = { _id: ObjectId} & BlogDBInputType;
+
+export type PostDBInputType = {
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
+    blogName: string
+    createdAt: string
 }
 
 export type PostDBType = {
@@ -72,6 +87,7 @@ export type PostDBType = {
     blogId: string
     blogName: string
     createdAt: string
+    comments: CommentDBType[]
 }
 
 export type UserDBType = {
@@ -95,5 +111,35 @@ export type UserViewModel = {
     id: string
     login: string
     email: string
+    createdAt: string
+}
+
+export type CommentType = {
+    id: string
+    content: string
+    commentatorInfo: {
+        userId: string,
+        userLogin: string
+    }
+    createdAt: string
+}
+
+
+export type CommentDBInputType = {
+    content: string
+    commentatorInfo: {
+        userId: string,
+        userLogin: string
+    }
+    createdAt: string
+}
+
+export type CommentDBType = {
+    _id: ObjectId
+    content: string
+    commentatorInfo: {
+        userId: string,
+        userLogin: string
+    }
     createdAt: string
 }

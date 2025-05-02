@@ -54,7 +54,7 @@ blogsRouter.get("/:id/posts", async (req: Request, res: Response) => {
         const foundPosts = await postsQueriesRepository.findPosts({pageNumber, pageSize, sortBy, sortDirection, searchNameTerm, blogId});
         const postsCounts  = await postsQueriesRepository.getPostsCount(searchNameTerm, blogId)
         const result = postsQueriesRepository.mapPaginationViewModel({postsCounts, foundPosts, pageSize, pageNumber})
-        res.status(HTTP_STATUSES.OK_200).json(result)
+        res.sendStatus(HTTP_STATUSES.OK_200).json(result)
     }
     res.send(HTTP_STATUSES.NOT_FOUND_404)
 })

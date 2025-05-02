@@ -24,7 +24,7 @@ describe('/blogs', () => {
             items: expect.any(Array),
             page: expect.any(Number),
             pageSize: expect.any(Number),
-            pageCount: expect.any(Number),
+            pagesCount: expect.any(Number),
             totalCount: expect.any(Number),
         };
 
@@ -81,7 +81,7 @@ describe('/blogs', () => {
             items: expect.any(Array),
             page: expect.any(Number),
             pageSize: expect.any(Number),
-            pageCount: expect.any(Number),
+            pagesCount: expect.any(Number),
             totalCount: expect.any(Number),
         };
 

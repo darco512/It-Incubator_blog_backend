@@ -10,6 +10,10 @@ import {ObjectId} from "mongodb";
 import {blogsService} from "../domain/blogs-service";
 import {paginationQueries} from "../helpers/paginations-values";
 import {postsQueriesRepository} from "../repositories/posts-queries-repository";
+import {commentsQueriesRepository} from "../repositories/comments-queries-repository";
+import {commentInputsValidation} from "../input-output-types/comment-input-validator";
+import {postsRepository} from "../repositories/posts-repository";
+import {commentsService} from "../domain/comments-service";
 
 export const postsRouter = Router();
 
@@ -31,7 +35,6 @@ postsRouter.post(
     postInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
-
 
         const blog = await blogsRepository.findBlogById(new ObjectId(req.body.blogId));
 
@@ -64,7 +67,6 @@ postsRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (
     }
 })
 
-
 postsRouter.put("/:id", authMiddleware , postInputsValidation, inputValidationMiddleware,  objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const blog = await blogsService.findBlogById(new ObjectId(req.body.blogId))
 
@@ -78,9 +80,30 @@ postsRouter.put("/:id", authMiddleware , postInputsValidation, inputValidationMi
     } else {
         res.send(HTTP_STATUSES.BAD_REQUEST_400)
     }
-
-
-
-
-
 })
+
+postsRouter.get("/:id/comments", async (req: Request, res: Response) => {
+    const {pageNumber, pageSize, sortBy, sortDirection, postId} = paginationQueries(req)
+
+    const foundComments = await commentsQueriesRepository.findComments({pageNumber, pageSize, sortBy, sortDirection, postId});
+    const commentsCounts  = await commentsQueriesRepository.getCommentsCount(postId)
+    const result = commentsQueriesRepository.mapPaginationViewModel({commentsCounts, foundComments, pageSize, pageNumber})
+    res.status(HTTP_STATUSES.OK_200).json(result)
+})
+
+postsRouter.post("/:id/comments",
+    authMiddleware,
+    commentInputsValidation,
+    inputValidationMiddleware,
+    async (req: Request, res: Response) => {
+        const post = await postsRepository.findPostById(new ObjectId(req.params.id));
+
+        if (post) {
+            const newCommentId = await commentsService.createComment(new ObjectId(req.params.id), req.body, req.user!);
+            const newComment = await commentsService.findComment(newCommentId);
+            res.status(HTTP_STATUSES.CREATED_201).send(newComment);
+        } else {
+            res.send(HTTP_STATUSES.NOT_FOUND_404)
+        }
+    })
+

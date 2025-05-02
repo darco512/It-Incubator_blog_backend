@@ -1,4 +1,4 @@
-import {InputUserType, UserDBType} from '../input-output-types/types'
+import { UserDBType} from '../input-output-types/types'
 import {ObjectId} from "mongodb";
 import {userCollection} from "../db/mongo-db";
 

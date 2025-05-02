@@ -13,9 +13,11 @@ export const SETTINGS = {
         TESTS: '/testing/all-data',
         AUTH: '/auth',
         USERS: '/users',
+        COMMENTS: '/comments',
     },
     MONGO_URL: process.env.MONGO_URL || "mongodb://0.0.0.0:27017",
-    DB_NAME: process.env.DB_NAME || "test"
+    DB_NAME: process.env.DB_NAME || "test",
+    JWT_SECRET: process.env.JWT_SECRET || "123"
 }
 
 // const x = SETTINGS.PATH.VIDEO
