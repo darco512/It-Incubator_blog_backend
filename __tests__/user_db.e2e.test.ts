@@ -36,8 +36,8 @@ describe('/users', () => {
     })
 
     const user :UserInputType = {
-        login: 'newUser',
-        password: '12345578',
+        login: 'admin',
+        password: 'qwerty',
         email: 'example@gmail.com',
     }
 

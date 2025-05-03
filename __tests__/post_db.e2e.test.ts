@@ -14,12 +14,12 @@ describe('/posts', () => {
         await blogCollection.deleteMany()
         await postCollection.deleteMany()
 
-        // const authResponse = await req
-        //     .post(`${SETTINGS.PATH.AUTH}/login`)
-        //     .send({ loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD });
-        //
-        // token = authResponse.body.accessToken ;
-        // if (!token) throw new Error("Login failed in beforeAll");
+        const authResponse = await req
+            .post(`${SETTINGS.PATH.AUTH}/login`)
+            .send({ loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD });
+
+        token = authResponse.body.accessToken ;
+        if (!token) throw new Error("Login failed in beforeAll");
     })
 
     
@@ -78,7 +78,7 @@ describe('/posts', () => {
         console.log(res.body)
     })
 
-
+  let postId: string
 
     it('should create post', async () => {
         const newBlogPost :InputPostType = {
@@ -93,7 +93,7 @@ describe('/posts', () => {
             .set('Authorization', `Basic ${base64Credentials}`)
             .send(newBlogPost) // отправка данных
 
-
+        postId = res.body.id
         console.log(res.body)
 
     })
@@ -219,4 +219,67 @@ describe('/posts', () => {
             .send(updatedPost)
             .expect(204)
     })
+
+    let commentId: string
+
+    it('should create comment', async () => {
+
+        const res = await req
+            .post(`${SETTINGS.PATH.POSTS}/${postId}/comments`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({content: "first comment asdasd asd asd asd asd asd asdasd"}) // отправка данных
+            .expect(201)
+        commentId = res.body.id
+        console.log(res.body)
+
+    })
+
+    it('should get comment', async () => {
+
+        const res = await req
+            .get(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
+            .expect(200)
+        console.log(res.body)
+
+    })
+
+    it('should get comments of the post', async () => {
+
+        const res = await req
+            .get(`${SETTINGS.PATH.POSTS}/${postId}/comments`)
+            .expect(200)
+        console.log(res.body)
+
+        const expected = {
+            items: expect.any(Array),
+            page: expect.any(Number),
+            pageSize: expect.any(Number),
+            pagesCount: expect.any(Number),
+            totalCount: expect.any(Number),
+        };
+
+        expect(res.body).toEqual(expected)
+
+    })
+
+    it('should get comments of the post', async () => {
+
+        await req
+            .put(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({content: "asdddddddddddddddddddddddddddddddddddddddddddddd"})
+            .expect(204)
+
+    })
+
+    it('should get comments of the post', async () => {
+
+        await req
+            .delete(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(204)
+
+    })
+
+
 })

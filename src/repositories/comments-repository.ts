@@ -22,7 +22,7 @@ export const commentRepository = {
 
         const result = await postCollection.aggregate([
             { $unwind: "$comments" },
-            {$match: { "comments._id": _id } },
+            { $match: { "comments._id": _id } },
             { $limit: 1},
             { $replaceRoot: {newRoot: "$comments"} }
         ]).toArray()

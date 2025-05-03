@@ -97,7 +97,7 @@ postsRouter.post("/:id/comments",
     commentInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
-        const post = await postsRepository.findPostById(new ObjectId(req.params.id));
+        const post = await postsService.findPostById(new ObjectId(req.params.id));
 
         if (post) {
             const newCommentId = await commentsService.createComment(new ObjectId(req.params.id), req.body, req.user!);

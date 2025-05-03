@@ -13,7 +13,7 @@ commentsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, re
 
     let comment = await commentsService.findComment(new ObjectId(req.params.id));
     if (comment){
-        res.send(comment);
+        res.status(HTTP_STATUSES.OK_200).send(comment);
     } else {
         res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
