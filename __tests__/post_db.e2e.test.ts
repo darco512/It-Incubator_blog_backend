@@ -14,12 +14,12 @@ describe('/posts', () => {
         await blogCollection.deleteMany()
         await postCollection.deleteMany()
 
-        const authResponse = await req
-            .post(`${SETTINGS.PATH.AUTH}/login`)
-            .send({ loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD });
-
-        token = authResponse.body.accessToken ;
-        if (!token) throw new Error("Login failed in beforeAll");
+        // const authResponse = await req
+        //     .post(`${SETTINGS.PATH.AUTH}/login`)
+        //     .send({ loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD });
+        //
+        // token = authResponse.body.accessToken ;
+        // if (!token) throw new Error("Login failed in beforeAll");
     })
 
     
@@ -61,7 +61,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(newBlog) // отправка данных
             .expect(201)
 
@@ -90,7 +90,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(newBlogPost) // отправка данных
 
 
@@ -130,7 +130,7 @@ describe('/posts', () => {
     it ('shouldn\'t delete post', async () => {
         await req
             .delete(SETTINGS.PATH.POSTS + '/1')
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .expect(404)
     })
 
@@ -145,7 +145,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(secondPost)
             .expect(201)
 
@@ -154,7 +154,7 @@ describe('/posts', () => {
 
         await req
             .delete(`${SETTINGS.PATH.POSTS}/${id}`)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .expect(204)
     })
 
@@ -169,7 +169,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(secondPost)
             .expect(201)
 
@@ -185,7 +185,7 @@ describe('/posts', () => {
 
         await req
             .put(`${SETTINGS.PATH.POSTS}/${id}`)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(updatedPost)
             .expect(400)
     })
@@ -200,7 +200,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(secondPost)
             .expect(201)
 
@@ -215,7 +215,7 @@ describe('/posts', () => {
 
         await req
             .put(`${SETTINGS.PATH.POSTS}/${id}`)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(updatedPost)
             .expect(204)
     })

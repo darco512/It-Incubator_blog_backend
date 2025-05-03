@@ -7,5 +7,6 @@ export const testingRouter = Router();
 testingRouter.delete('/', async (req, res) => {
     await blogCollection.deleteMany({})
     await postCollection.deleteMany({})
+    await userCollection.deleteMany({})
     res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
 })

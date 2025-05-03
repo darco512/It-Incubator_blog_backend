@@ -9,12 +9,13 @@ import {userInputsValidation} from "../input-output-types/user-input-validations
 import {objectIdValidationMiddleware} from "../middlewares/ObjectId-validation-middleware";
 import {ObjectId} from "mongodb";
 import {usersRepository} from "../repositories/users-repository";
+import {baseAuthMiddleware} from "../middlewares/base-auth-middleware";
 
 export const usersRouter = Router()
 
 
 usersRouter.get("/",
-    authMiddleware,
+    baseAuthMiddleware,
     async (req: Request, res: Response) => {
 
         const {pageNumber, pageSize, sortBy, sortDirection, searchLoginTerm, searchEmailTerm} = paginationQueries(req)
@@ -35,6 +36,7 @@ usersRouter.get("/:id",
 
 
 usersRouter.post('/',
+    baseAuthMiddleware,
     userInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
@@ -52,7 +54,7 @@ usersRouter.post('/',
     }
 )
 
-usersRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
+usersRouter.delete("/:id", baseAuthMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isDeleted = await usersService.deleteUser(new ObjectId(req.params.id));
     if (isDeleted) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);

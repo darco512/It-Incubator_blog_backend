@@ -12,6 +12,7 @@ import {postsQueriesRepository} from "../repositories/posts-queries-repository";
 import {postInputsValidation} from "../input-output-types/post-input-validations";
 import {blogsRepository} from "../repositories/blogs-repository";
 import {postsService} from "../domain/posts-service";
+import {baseAuthMiddleware} from "../middlewares/base-auth-middleware";
 
 export const blogsRouter = Router();
 
@@ -64,7 +65,7 @@ blogsRouter.get("/:id/posts", async (req: Request, res: Response) => {
 
 blogsRouter.post(
     "/",
-    authMiddleware,
+    baseAuthMiddleware,
     blogInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
@@ -78,7 +79,7 @@ blogsRouter.post(
 
 blogsRouter.post(
     "/:id/posts",
-    authMiddleware,
+    baseAuthMiddleware,
     postInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
@@ -94,7 +95,7 @@ blogsRouter.post(
     }
 );
 
-blogsRouter.put("/:id", authMiddleware , blogInputsValidation, inputValidationMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
+blogsRouter.put("/:id", baseAuthMiddleware , blogInputsValidation, inputValidationMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isUpdated = await blogsService.updateBlog(new ObjectId(req.params.id), req.body);
     if (isUpdated){
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
@@ -104,7 +105,7 @@ blogsRouter.put("/:id", authMiddleware , blogInputsValidation, inputValidationMi
 })
 
 
-blogsRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
+blogsRouter.delete("/:id", baseAuthMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isDeleted = await blogsService.deleteBlog(new ObjectId(req.params.id));
     if (isDeleted) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);

@@ -4,7 +4,7 @@ import {usersService} from "../domain/users-service";
 import {HTTP_STATUSES} from "../utils";
 
 export const ADMIN_USERNAME = "admin";
-export const ADMIN_PASSWORD = "123456";
+export const ADMIN_PASSWORD = "qwerty";
 
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {

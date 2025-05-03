@@ -14,12 +14,12 @@ describe('/blogs', () => {
         await runDB(SETTINGS.MONGO_URL)
         await blogCollection.deleteMany()
 
-        const authResponse = await req
-            .post(`${SETTINGS.PATH.AUTH}/login`)
-            .send({ loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD });
-
-        token = authResponse.body.accessToken ;
-        if (!token) throw new Error("Login failed in beforeAll");
+        // const authResponse = await req
+        //     .post(`${SETTINGS.PATH.AUTH}/login`)
+        //     .send({ loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD });
+        //
+        // token = authResponse.body.accessToken ;
+        // if (!token) throw new Error("Login failed in beforeAll");
     })
 
     it('should get empty array', async () => {
@@ -60,7 +60,7 @@ describe('/blogs', () => {
 
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(newBlog) // отправка данных
             .expect(201)
 
@@ -109,7 +109,7 @@ describe('/blogs', () => {
     it ('shouldn\'t delete blog', async () => {
         await req
             .delete(SETTINGS.PATH.BLOGS + '/1')
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .expect(404)
     })
 
@@ -123,7 +123,7 @@ describe('/blogs', () => {
 
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(secondBlog)
             .expect(201)
 
@@ -131,7 +131,7 @@ describe('/blogs', () => {
 
         await req
             .delete(`${SETTINGS.PATH.BLOGS}/${id}`)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .expect(204)
     })
 
@@ -145,7 +145,7 @@ describe('/blogs', () => {
 
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(secondBlog)
             .expect(201)
 
@@ -160,7 +160,7 @@ describe('/blogs', () => {
 
         await req
             .put(`${SETTINGS.PATH.BLOGS}/${id}`)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(updatedPost)
             .expect(400)
         console.log(res.body)
@@ -175,7 +175,7 @@ describe('/blogs', () => {
 
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(secondBlog)
             .expect(201)
 
@@ -189,7 +189,7 @@ describe('/blogs', () => {
 
         const blog = await req
             .put(`${SETTINGS.PATH.BLOGS}/${id}`)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Authorization', `Basic ${base64Credentials}`)
             .send(updatedBlog)
             .expect(HTTP_STATUSES.NO_CONTENT_204)
 

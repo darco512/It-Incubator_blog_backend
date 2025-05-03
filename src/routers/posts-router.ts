@@ -14,6 +14,7 @@ import {commentsQueriesRepository} from "../repositories/comments-queries-reposi
 import {commentInputsValidation} from "../input-output-types/comment-input-validator";
 import {postsRepository} from "../repositories/posts-repository";
 import {commentsService} from "../domain/comments-service";
+import {baseAuthMiddleware} from "../middlewares/base-auth-middleware";
 
 export const postsRouter = Router();
 
@@ -31,7 +32,7 @@ postsRouter.get("/",async (req: Request, res: Response) => {
 
 postsRouter.post(
     "/",
-    authMiddleware,
+    baseAuthMiddleware,
     postInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
@@ -58,7 +59,7 @@ postsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, res: 
     }
 })
 
-postsRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
+postsRouter.delete("/:id", baseAuthMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isDeleted = await postsService.deletePost(new ObjectId(req.params.id));
     if (isDeleted) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
@@ -67,7 +68,7 @@ postsRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (
     }
 })
 
-postsRouter.put("/:id", authMiddleware , postInputsValidation, inputValidationMiddleware,  objectIdValidationMiddleware, async (req: Request, res: Response) => {
+postsRouter.put("/:id", baseAuthMiddleware , postInputsValidation, inputValidationMiddleware,  objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const blog = await blogsService.findBlogById(new ObjectId(req.body.blogId))
 
     if (blog) {
