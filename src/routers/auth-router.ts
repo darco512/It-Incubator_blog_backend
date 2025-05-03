@@ -18,7 +18,7 @@ authRouter.post('/login',
         const token = await jwtService.createJWT(user)
         res.status(HTTP_STATUSES.OK_200).send({accessToken: token})
     } else {
-        res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
+        res.status(HTTP_STATUSES.UNAUTHORIZED_401).send({errorsMessages: [{
         message: 'Credentials doesn\'t mathc',
         field: 'loginOrEmail',
         }]})
