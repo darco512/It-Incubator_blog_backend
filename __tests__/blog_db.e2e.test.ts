@@ -18,7 +18,7 @@ describe('/blogs', () => {
             .post(`${SETTINGS.PATH.AUTH}/login`)
             .send({ loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD });
 
-        token = authResponse.body.token;
+        token = authResponse.body.accessToken ;
         if (!token) throw new Error("Login failed in beforeAll");
     })
 
