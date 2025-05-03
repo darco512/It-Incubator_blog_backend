@@ -42,7 +42,7 @@ blogsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, res: 
     if (blog){
         res.send(blog);
     } else {
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
 })
 
@@ -54,9 +54,11 @@ blogsRouter.get("/:id/posts", async (req: Request, res: Response) => {
         const foundPosts = await postsQueriesRepository.findPosts({pageNumber, pageSize, sortBy, sortDirection, searchNameTerm, blogId});
         const postsCounts  = await postsQueriesRepository.getPostsCount(searchNameTerm, blogId)
         const result = postsQueriesRepository.mapPaginationViewModel({postsCounts, foundPosts, pageSize, pageNumber})
-        res.sendStatus(HTTP_STATUSES.OK_200).json(result)
+        res.status(HTTP_STATUSES.OK_200).json(result)
+    } else {
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
     }
-    res.send(HTTP_STATUSES.NOT_FOUND_404)
+
 })
 
 
@@ -66,6 +68,7 @@ blogsRouter.post(
     blogInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
+        debugger;
         const newBlogId = await blogsService.createBlog(req.body);
         const newBlog = await blogsService.findBlogById(newBlogId);
         res.status(HTTP_STATUSES.CREATED_201).json(newBlog); // No explicit return
@@ -86,7 +89,7 @@ blogsRouter.post(
             const newPost = await postsService.findPostById(newPostId);
             res.status(HTTP_STATUSES.CREATED_201).json(newPost); // No explicit return
         } else {
-            res.send(HTTP_STATUSES.NOT_FOUND_404)
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         }
     }
 );
@@ -94,9 +97,9 @@ blogsRouter.post(
 blogsRouter.put("/:id", authMiddleware , blogInputsValidation, inputValidationMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isUpdated = await blogsService.updateBlog(new ObjectId(req.params.id), req.body);
     if (isUpdated){
-        res.send(HTTP_STATUSES.NO_CONTENT_204);
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else {
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
 })
 
@@ -104,8 +107,8 @@ blogsRouter.put("/:id", authMiddleware , blogInputsValidation, inputValidationMi
 blogsRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isDeleted = await blogsService.deleteBlog(new ObjectId(req.params.id));
     if (isDeleted) {
-        res.send(HTTP_STATUSES.NO_CONTENT_204);
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else{
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
 })

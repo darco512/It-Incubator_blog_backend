@@ -1,5 +1,4 @@
 import {req} from './test-helpers'
-import {dataset1} from './datasets'
 import {SETTINGS} from "../src/settings";
 import {HTTP_STATUSES} from "../src/utils";
 import {InputBlogType, InputPostType, OutputBlogType} from "../src/input-output-types/types";
@@ -9,13 +8,21 @@ import {blogCollection, postCollection, runDB} from "../src/db/mongo-db";
 describe('/posts', () => {
 
     const base64Credentials = Buffer.from(`${ADMIN_USERNAME}:${ADMIN_PASSWORD}`).toString('base64');
-
+    let token: string;
     beforeAll(async () => { // очистка базы данных перед началом тестирования
         await runDB(SETTINGS.MONGO_URL)
         await blogCollection.deleteMany()
         await postCollection.deleteMany()
+
+        const authResponse = await req
+            .post(`${SETTINGS.PATH.AUTH}/login`)
+            .send({ loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD });
+
+        token = authResponse.body.token;
+        if (!token) throw new Error("Login failed in beforeAll");
     })
 
+    
     it('should get empty array', async () => {
 
         const res = await req
@@ -26,7 +33,7 @@ describe('/posts', () => {
             items: expect.any(Array),
             page: expect.any(Number),
             pageSize: expect.any(Number),
-            pageCount: expect.any(Number),
+            pagesCount: expect.any(Number),
             totalCount: expect.any(Number),
         };
 
@@ -54,7 +61,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.BLOGS)
-            .set('Authorization', `Basic ${base64Credentials}`)
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlog) // отправка данных
             .expect(201)
 
@@ -83,7 +90,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
-            .set('Authorization', `Basic ${base64Credentials}`)
+            .set('Authorization', `Bearer ${token}`)
             .send(newBlogPost) // отправка данных
 
 
@@ -103,7 +110,7 @@ describe('/posts', () => {
             items: expect.any(Array),
             page: expect.any(Number),
             pageSize: expect.any(Number),
-            pageCount: expect.any(Number),
+            pagesCount: expect.any(Number),
             totalCount: expect.any(Number),
         };
 
@@ -123,7 +130,7 @@ describe('/posts', () => {
     it ('shouldn\'t delete post', async () => {
         await req
             .delete(SETTINGS.PATH.POSTS + '/1')
-            .set('Authorization', `Basic ${base64Credentials}`)
+            .set('Authorization', `Bearer ${token}`)
             .expect(404)
     })
 
@@ -138,7 +145,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
-            .set('Authorization', `Basic ${base64Credentials}`)
+            .set('Authorization', `Bearer ${token}`)
             .send(secondPost)
             .expect(201)
 
@@ -147,7 +154,7 @@ describe('/posts', () => {
 
         await req
             .delete(`${SETTINGS.PATH.POSTS}/${id}`)
-            .set('Authorization', `Basic ${base64Credentials}`)
+            .set('Authorization', `Bearer ${token}`)
             .expect(204)
     })
 
@@ -162,7 +169,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
-            .set('Authorization', `Basic ${base64Credentials}`)
+            .set('Authorization', `Bearer ${token}`)
             .send(secondPost)
             .expect(201)
 
@@ -178,7 +185,7 @@ describe('/posts', () => {
 
         await req
             .put(`${SETTINGS.PATH.POSTS}/${id}`)
-            .set('Authorization', `Basic ${base64Credentials}`)
+            .set('Authorization', `Bearer ${token}`)
             .send(updatedPost)
             .expect(400)
     })
@@ -193,7 +200,7 @@ describe('/posts', () => {
 
         const res = await req
             .post(SETTINGS.PATH.POSTS)
-            .set('Authorization', `Basic ${base64Credentials}`)
+            .set('Authorization', `Bearer ${token}`)
             .send(secondPost)
             .expect(201)
 
@@ -208,7 +215,7 @@ describe('/posts', () => {
 
         await req
             .put(`${SETTINGS.PATH.POSTS}/${id}`)
-            .set('Authorization', `Basic ${base64Credentials}`)
+            .set('Authorization', `Bearer ${token}`)
             .send(updatedPost)
             .expect(204)
     })

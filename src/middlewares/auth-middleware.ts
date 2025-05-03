@@ -1,14 +1,16 @@
 import {Request, Response, NextFunction} from "express";
 import {jwtService} from "../application/jwt-service";
 import {usersService} from "../domain/users-service";
+import {HTTP_STATUSES} from "../utils";
 
 export const ADMIN_USERNAME = "admin";
-export const ADMIN_PASSWORD = "qwerty";
+export const ADMIN_PASSWORD = "123456";
 
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+
     if (!req.headers.authorization) {
-        res.sendStatus(401);
+        res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
         return;
     }
 
@@ -19,6 +21,8 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     if (userId) {
         req.user = await usersService.findUserById(userId)
         next()
+    } else {
+        res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
     }
-    res.send(401)
+
 }

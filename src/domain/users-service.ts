@@ -37,8 +37,8 @@ export const usersService = {
         return usersRepository.createUser(newUser)
     },
 
-    async findUserById(id: ObjectId): Promise<UserDBType | null> {
-        return usersRepository.findUserById(id)
+    async findUserById(_id: ObjectId): Promise<UserDBType | null> {
+        return usersRepository.findUserById(_id)
     },
 
     async checkCredentials(loginOrEmail: string, password: string){

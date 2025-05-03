@@ -14,7 +14,7 @@ app.get('/', (req, res) => {
     // эндпоинт, который будет показывать на верселе какая версия бэкэнда сейчас залита
     res.status(200).json({version: '5.3'})
 })
-const parserMiddleware = bodyParser({});
+const parserMiddleware = bodyParser.urlencoded({ extended: true })
 
 app.use(parserMiddleware)
 

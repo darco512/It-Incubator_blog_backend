@@ -15,16 +15,16 @@ commentsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, re
     if (comment){
         res.send(comment);
     } else {
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
 })
 
 commentsRouter.put("/:id", authMiddleware , commentInputsValidation, inputValidationMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isUpdated = await commentsService.updateComment(new ObjectId(req.params.id), req.body);
     if (isUpdated){
-        res.send(HTTP_STATUSES.NO_CONTENT_204);
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else {
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
 })
 
@@ -32,8 +32,8 @@ commentsRouter.put("/:id", authMiddleware , commentInputsValidation, inputValida
 commentsRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isDeleted = await commentsService.deleteComment(new ObjectId(req.params.id));
     if (isDeleted) {
-        res.send(HTTP_STATUSES.NO_CONTENT_204);
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else{
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
 })

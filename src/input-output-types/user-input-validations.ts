@@ -26,7 +26,7 @@ export const passwordValidation = body("password")
     .withMessage("Password should be a string")
     .trim()
     .isLength({ min: 6, max: 20 })
-    .withMessage("Wrong description size, it can't be less than 6 and more than 20 symbols")
+    .withMessage("Wrong password size, it can't be less than 6 and more than 20 symbols")
 
 export const emailValidation = body("email")
     .isString()

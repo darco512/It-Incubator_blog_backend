@@ -54,16 +54,16 @@ postsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, res: 
     if (blog){
         res.send(blog);
     } else {
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
 })
 
 postsRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isDeleted = await postsService.deletePost(new ObjectId(req.params.id));
     if (isDeleted) {
-        res.send(HTTP_STATUSES.NO_CONTENT_204);
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else{
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
 })
 
@@ -73,12 +73,12 @@ postsRouter.put("/:id", authMiddleware , postInputsValidation, inputValidationMi
     if (blog) {
         const isUpdated = await postsService.updatePost(new ObjectId(req.params.id), req.body.title, req.body.shortDescription, req.body.content, req.body.blogId, blog.name);
         if (isUpdated){
-            res.send(HTTP_STATUSES.NO_CONTENT_204);
+            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
         } else {
-            res.send(HTTP_STATUSES.NOT_FOUND_404);
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
         }
     } else {
-        res.send(HTTP_STATUSES.BAD_REQUEST_400)
+        res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400)
     }
 })
 
@@ -103,7 +103,7 @@ postsRouter.post("/:id/comments",
             const newComment = await commentsService.findComment(newCommentId);
             res.status(HTTP_STATUSES.CREATED_201).send(newComment);
         } else {
-            res.send(HTTP_STATUSES.NOT_FOUND_404)
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
         }
     })
 

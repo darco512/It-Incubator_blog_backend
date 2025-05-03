@@ -4,7 +4,7 @@ import {HTTP_STATUSES} from "../utils";
 
 export const objectIdValidationMiddleware = (req: Request, res: Response, next: NextFunction) => {
     if(!ObjectId.isValid(req.params.id)){
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
         return
     }
 

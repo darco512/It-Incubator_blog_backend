@@ -8,6 +8,7 @@ import {inputValidationMiddleware} from "../middlewares/input-validation-middlew
 import {userInputsValidation} from "../input-output-types/user-input-validations";
 import {objectIdValidationMiddleware} from "../middlewares/ObjectId-validation-middleware";
 import {ObjectId} from "mongodb";
+import {usersRepository} from "../repositories/users-repository";
 
 export const usersRouter = Router()
 
@@ -25,10 +26,15 @@ usersRouter.get("/",
         res.status(HTTP_STATUSES.OK_200).json(result)
 })
 
+usersRouter.get("/:id",
+    async (req: Request, res: Response) => {
+
+        const result =  await usersRepository.findUserById(new ObjectId(req.params.id))
+        res.status(HTTP_STATUSES.OK_200).send(result)
+    })
 
 
 usersRouter.post('/',
-    authMiddleware,
     userInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
@@ -49,8 +55,8 @@ usersRouter.post('/',
 usersRouter.delete("/:id", authMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
     const isDeleted = await usersService.deleteUser(new ObjectId(req.params.id));
     if (isDeleted) {
-        res.send(HTTP_STATUSES.NO_CONTENT_204);
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else{
-        res.send(HTTP_STATUSES.NOT_FOUND_404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
     }
 })
