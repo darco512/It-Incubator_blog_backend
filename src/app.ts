@@ -12,7 +12,7 @@ app.use(express.json()) // создание свойств-объектов body
 
 app.get('/', (req, res) => {
     // эндпоинт, который будет показывать на верселе какая версия бэкэнда сейчас залита
-    res.status(200).json({version: '6.3'})
+    res.status(200).json({version: '6.5'})
 })
 const parserMiddleware = bodyParser.urlencoded({ extended: true })
 
