@@ -84,12 +84,18 @@ postsRouter.put("/:id", baseAuthMiddleware , postInputsValidation, inputValidati
 })
 
 postsRouter.get("/:id/comments", async (req: Request, res: Response) => {
-    const {pageNumber, pageSize, sortBy, sortDirection, postId} = paginationQueries(req)
+    const post = await postsService.findPostById(new ObjectId(req.params.id));
+    if (post) {
+        const {pageNumber, pageSize, sortBy, sortDirection, postId} = paginationQueries(req)
+        const foundComments = await commentsQueriesRepository.findComments({pageNumber, pageSize, sortBy, sortDirection, postId});
+        const commentsCounts  = await commentsQueriesRepository.getCommentsCount(postId)
+        const result = commentsQueriesRepository.mapPaginationViewModel({commentsCounts, foundComments, pageSize, pageNumber})
+        res.status(HTTP_STATUSES.OK_200).json(result)
+    } else {
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+    }
 
-    const foundComments = await commentsQueriesRepository.findComments({pageNumber, pageSize, sortBy, sortDirection, postId});
-    const commentsCounts  = await commentsQueriesRepository.getCommentsCount(postId)
-    const result = commentsQueriesRepository.mapPaginationViewModel({commentsCounts, foundComments, pageSize, pageNumber})
-    res.status(HTTP_STATUSES.OK_200).json(result)
+
 })
 
 postsRouter.post("/:id/comments",

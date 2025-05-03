@@ -262,7 +262,7 @@ describe('/posts', () => {
 
     })
 
-    it('should get comments of the post', async () => {
+    it('should update comment', async () => {
 
         await req
             .put(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
@@ -272,7 +272,17 @@ describe('/posts', () => {
 
     })
 
-    it('should get comments of the post', async () => {
+    it('shouldn\'t update comment', async () => {
+
+        await req
+            .put(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
+            .set('Authorization', `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE2YTNmYzhhMTYxMWNmMThiZTZmNTkiLCJpYXQiOjE3NDYzMTQyNDcsImV4cCI6MTc0NjMxNzg0N30.b3FOlBErMEuzPVH0-V4gr00JQ5643mZjJRKv_YEBNEs`)
+            .send({content: "asdddddddddddddddddddddddddddddddddddddddddddddd"})
+            .expect(403)
+
+    })
+
+    it('should delete comment', async () => {
 
         await req
             .delete(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
