@@ -22,7 +22,7 @@ commentsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, re
 commentsRouter.put("/:id", authMiddleware , commentInputsValidation, inputValidationMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
 
     const comment = await commentsService.findComment(new ObjectId(req.params.id))
-    if (comment?.commentatorInfo.userId !== req.user?._id.toString()){
+    if (comment && comment.commentatorInfo.userId !== req.user?._id.toString()){
         res.sendStatus(403);
         return
     }
