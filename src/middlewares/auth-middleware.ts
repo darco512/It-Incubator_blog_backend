@@ -20,6 +20,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
     if (userId) {
         req.user = await usersService.findUserById(userId)
+        console.log(req.user)
         next()
     } else {
         res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401)
