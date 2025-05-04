@@ -276,7 +276,7 @@ describe('/posts', () => {
 
         await req
             .put(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
-            .set('Authorization', `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE2YTNmYzhhMTYxMWNmMThiZTZmNTkiLCJpYXQiOjE3NDYzMTQyNDcsImV4cCI6MTc0NjMxNzg0N30.b3FOlBErMEuzPVH0-V4gr00JQ5643mZjJRKv_YEBNEs`)
+            .set('Authorization', `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE2YWUxNGM4OTE2M2ZjODgxMjJlNmIiLCJpYXQiOjE3NDYzMTY4MzIsImV4cCI6MTc0NjMyMDQzMn0.Hape_gRqFsZMoJIjtdkH2-ZrbWoAvGkM7cBwusIBYwg`)
             .send({content: "asdddddddddddddddddddddddddddddddddddddddddddddd"})
             .expect(403)
 

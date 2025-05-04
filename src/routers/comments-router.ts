@@ -20,10 +20,11 @@ commentsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, re
 })
 
 commentsRouter.put("/:id", authMiddleware , commentInputsValidation, inputValidationMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
-
+    debugger
     const comment = await commentsService.findComment(new ObjectId(req.params.id))
     if (comment?.commentatorInfo.userId !== req.user?._id.toString()){
         res.sendStatus(403);
+        return
     }
     const isUpdated = await commentsService.updateComment(new ObjectId(req.params.id), req.body);
     if (isUpdated){

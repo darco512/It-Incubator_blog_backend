@@ -8,7 +8,7 @@ export const ADMIN_PASSWORD = "qwerty";
 
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-
+    debugger
     if (!req.headers.authorization) {
         res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
         return;
