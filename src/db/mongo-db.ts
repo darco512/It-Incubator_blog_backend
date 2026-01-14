@@ -5,10 +5,12 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 let client: MongoClient | null = null;
-export let blogCollection: Collection<BlogDBType> | undefined
-export let postCollection: Collection<PostDBType> | undefined
-export let userCollection: Collection<UserDBType> | undefined
-export let commentCollection: Collection<CommentDBType> | undefined
+
+// Collections - will be initialized when DB connects
+export let blogCollection!: Collection<BlogDBType>;
+export let postCollection!: Collection<PostDBType>;
+export let userCollection!: Collection<UserDBType>;
+export let commentCollection!: Collection<CommentDBType>;
 
 export async function runDB(url: string): Promise<boolean> {
     try {

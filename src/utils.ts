@@ -10,3 +10,9 @@ export const HTTP_STATUSES = {
 
 export type HttpStatusKeys = keyof typeof HTTP_STATUSES
 export type HttpStatusType = (typeof HTTP_STATUSES)[HttpStatusKeys]
+
+// Helper to safely get string from req.params.id (handles string | string[])
+export function getParamId(id: string | string[] | undefined): string {
+    if (Array.isArray(id)) return id[0];
+    return id || '';
+}

@@ -2,7 +2,7 @@ import {Request, Response, Router} from "express";
 import {blogsRepository} from "../repositories/blogs-repository";
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware'
 import {authMiddleware} from "../middlewares/auth-middleware";
-import {HTTP_STATUSES} from "../utils";
+import {HTTP_STATUSES, getParamId} from "../utils";
 import {postsService} from "../domain/posts-service";
 import {postInputsValidation} from "../input-output-types/post-input-validations";
 import {objectIdValidationMiddleware} from "../middlewares/ObjectId-validation-middleware";
@@ -51,7 +51,7 @@ postsRouter.post(
 
 
 postsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, res: Response) => {
-    let blog = await postsService.findPostById(new ObjectId(req.params.id));
+    let blog = await postsService.findPostById(new ObjectId(getParamId(req.params.id)));
     if (blog){
         res.send(blog);
     } else {
@@ -60,7 +60,7 @@ postsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, res: 
 })
 
 postsRouter.delete("/:id", baseAuthMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
-    const isDeleted = await postsService.deletePost(new ObjectId(req.params.id));
+    const isDeleted = await postsService.deletePost(new ObjectId(getParamId(req.params.id)));
     if (isDeleted) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else{
@@ -72,7 +72,7 @@ postsRouter.put("/:id", baseAuthMiddleware , postInputsValidation, inputValidati
     const blog = await blogsService.findBlogById(new ObjectId(req.body.blogId))
 
     if (blog) {
-        const isUpdated = await postsService.updatePost(new ObjectId(req.params.id), req.body.title, req.body.shortDescription, req.body.content, req.body.blogId, blog.name);
+        const isUpdated = await postsService.updatePost(new ObjectId(getParamId(req.params.id)), req.body.title, req.body.shortDescription, req.body.content, req.body.blogId, blog.name);
         if (isUpdated){
             res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
         } else {
@@ -84,7 +84,7 @@ postsRouter.put("/:id", baseAuthMiddleware , postInputsValidation, inputValidati
 })
 
 postsRouter.get("/:id/comments", async (req: Request, res: Response) => {
-    const post = await postsService.findPostById(new ObjectId(req.params.id));
+    const post = await postsService.findPostById(new ObjectId(getParamId(req.params.id)));
     if (post) {
         const {pageNumber, pageSize, sortBy, sortDirection, postId} = paginationQueries(req)
         const foundComments = await commentsQueriesRepository.findComments({pageNumber, pageSize, sortBy, sortDirection, postId});
@@ -103,10 +103,10 @@ postsRouter.post("/:id/comments",
     commentInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
-        const post = await postsService.findPostById(new ObjectId(req.params.id));
+        const post = await postsService.findPostById(new ObjectId(getParamId(req.params.id)));
 
         if (post) {
-            const newCommentId = await commentsService.createComment(new ObjectId(req.params.id), req.body, req.user!);
+            const newCommentId = await commentsService.createComment(new ObjectId(getParamId(req.params.id)), req.body, req.user!);
             const newComment = await commentsService.findComment(newCommentId);
             res.status(HTTP_STATUSES.CREATED_201).send(newComment);
         } else {

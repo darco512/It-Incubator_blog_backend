@@ -3,7 +3,7 @@ import {blogsService} from "../domain/blogs-service";
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware'
 import {authMiddleware} from "../middlewares/auth-middleware";
 import {blogInputsValidation} from "../input-output-types/blog-input-validations";
-import {HTTP_STATUSES} from "../utils";
+import {HTTP_STATUSES, getParamId} from "../utils";
 import {objectIdValidationMiddleware} from "../middlewares/ObjectId-validation-middleware";
 import {ObjectId, SortDirection} from "mongodb";
 import {paginationQueries} from "../helpers/paginations-values";
@@ -39,7 +39,7 @@ blogsRouter.get("/", async (req: Request, res: Response) => {
 
 blogsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, res: Response) => {
 
-    let blog = await blogsService.findBlogById(new ObjectId(req.params.id));
+    let blog = await blogsService.findBlogById(new ObjectId(getParamId(req.params.id)));
     if (blog){
         res.send(blog);
     } else {
@@ -83,10 +83,11 @@ blogsRouter.post(
     postInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
-        const blog = await blogsRepository.findBlogById(new ObjectId(req.params.id));
+        const blogId = getParamId(req.params.id);
+        const blog = await blogsRepository.findBlogById(new ObjectId(blogId));
 
         if (blog) {
-            const newPostId = await postsService.createPost(req.body.title, req.body.shortDescription, req.body.content, req.params.id, blog.name);
+            const newPostId = await postsService.createPost(req.body.title, req.body.shortDescription, req.body.content, blogId, blog.name);
             const newPost = await postsService.findPostById(newPostId);
             res.status(HTTP_STATUSES.CREATED_201).json(newPost); // No explicit return
         } else {

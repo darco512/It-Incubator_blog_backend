@@ -1,6 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { usersService} from '../domain/users-service'
-import {HTTP_STATUSES} from "../utils";
+import {HTTP_STATUSES, getParamId} from "../utils";
 import {paginationQueries} from "../helpers/paginations-values";
 import {usersQueriesRepository} from "../repositories/users-queries-repository";
 import {authMiddleware} from "../middlewares/auth-middleware";
@@ -30,7 +30,7 @@ usersRouter.get("/",
 usersRouter.get("/:id",
     async (req: Request, res: Response) => {
 
-        const result =  await usersRepository.findUserById(new ObjectId(req.params.id))
+        const result =  await usersRepository.findUserById(new ObjectId(getParamId(req.params.id)))
         res.status(HTTP_STATUSES.OK_200).send(result)
     })
 
@@ -55,7 +55,7 @@ usersRouter.post('/',
 )
 
 usersRouter.delete("/:id", baseAuthMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
-    const isDeleted = await usersService.deleteUser(new ObjectId(req.params.id));
+    const isDeleted = await usersService.deleteUser(new ObjectId(getParamId(req.params.id)));
     if (isDeleted) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else{
