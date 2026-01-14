@@ -48,7 +48,7 @@ blogsRouter.get("/:id", objectIdValidationMiddleware, async (req: Request, res: 
 })
 
 blogsRouter.get("/:id/posts", async (req: Request, res: Response) => {
-    const blog = await blogsService.findBlogById(new ObjectId(req.params.id));
+    const blog = await blogsService.findBlogById(new ObjectId(getParamId(req.params.id)));
     if (blog) {
         const {pageNumber, pageSize, sortBy, sortDirection, searchNameTerm, blogId} = paginationQueries(req)
 
@@ -97,7 +97,7 @@ blogsRouter.post(
 );
 
 blogsRouter.put("/:id", baseAuthMiddleware , blogInputsValidation, inputValidationMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
-    const isUpdated = await blogsService.updateBlog(new ObjectId(req.params.id), req.body);
+    const isUpdated = await blogsService.updateBlog(new ObjectId(getParamId(req.params.id)), req.body);
     if (isUpdated){
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else {
@@ -107,7 +107,7 @@ blogsRouter.put("/:id", baseAuthMiddleware , blogInputsValidation, inputValidati
 
 
 blogsRouter.delete("/:id", baseAuthMiddleware, objectIdValidationMiddleware, async (req: Request, res: Response) => {
-    const isDeleted = await blogsService.deleteBlog(new ObjectId(req.params.id));
+    const isDeleted = await blogsService.deleteBlog(new ObjectId(getParamId(req.params.id)));
     if (isDeleted) {
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     } else{
