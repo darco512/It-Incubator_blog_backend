@@ -39,3 +39,36 @@ authRouter.get('/me',
         }
         res.status(HTTP_STATUSES.OK_200).json(user)
     })
+
+
+authRouter.post('/registration',
+    async (req: Request, res: Response) => {
+        const user = await usersService.createUser(req.body.login, req.body.email, req.body.password)
+        res.status(201).send()
+    })
+
+authRouter.post('/confirm-email',
+    async (req: Request, res: Response,) => {
+        const result = await usersService.confirmEmail(req.body.code, req.body.email);
+        if(result){
+            res.status(HTTP_STATUSES.NO_CONTENT_204).send({message: "Email was verified. Account was activated"})
+        } else {
+            res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
+                    message: 'If the confirmation code is incorrect, expired or already been applied',
+                    field: 'verificationCode',
+                }]})
+        }
+    })
+
+authRouter.post('/resend-registration-code',
+    async (req: Request, res: Response) => {
+        const result = await usersService.resendCode(req.body.email);
+        if(result){
+            res.status(HTTP_STATUSES.NO_CONTENT_204).send({message:"Email was verified. Account was activated"})
+        } else {
+            res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
+                    message: 'If the inputModel has incorrect values or if email is already confirmed',
+                    field: 'email',
+                }]})
+        }
+    })

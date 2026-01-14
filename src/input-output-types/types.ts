@@ -98,6 +98,7 @@ export type UserDBType = {
     passwordHash: string;
     passwordSalt: string;
     createdAt: string;
+    emailConfirmation : EmailConfirmationType;
 }
 
 export type InputUserType = {
@@ -106,6 +107,7 @@ export type InputUserType = {
     passwordHash: string;
     passwordSalt: string;
     createdAt: string;
+    emailConfirmation : EmailConfirmationType;
 }
 
 export type UserViewModel = {
@@ -113,6 +115,12 @@ export type UserViewModel = {
     login: string
     email: string
     createdAt: string
+}
+
+export type EmailConfirmationType = {
+    isConfirmed: boolean
+    confirmationCode: string
+    expirationDate: Date
 }
 
 export type CommentType = {
