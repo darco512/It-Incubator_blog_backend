@@ -2,6 +2,8 @@ import { Collection, MongoClient } from 'mongodb';
 import {BlogDBType, CommentDBType, PostDBType, UserDBType} from "../input-output-types/types";
 import {SETTINGS} from "../settings";
 import * as dotenv from "dotenv";
+import mongoose from 'mongoose'
+import {EmailConfirmationType, InputUserType} from "../input-output-types/types"
 dotenv.config();
 
 let client: MongoClient | null = null;
@@ -11,6 +13,7 @@ export let blogCollection!: Collection<BlogDBType>;
 export let postCollection!: Collection<PostDBType>;
 export let userCollection!: Collection<UserDBType>;
 export let commentCollection!: Collection<CommentDBType>;
+
 
 export async function runDB(url: string): Promise<boolean> {
     try {
@@ -49,3 +52,15 @@ export async function runDB(url: string): Promise<boolean> {
     }
 }
 
+// Initialize collections from mongoose connection (for testing)
+export function initCollectionsFromMongoose(mongooseConnection: typeof mongoose.connection): void {
+    const db = mongooseConnection.db;
+    if (!db) {
+        throw new Error("Mongoose database not available");
+    }
+    
+    blogCollection = db.collection<BlogDBType>(SETTINGS.PATH.BLOGS) as any as Collection<BlogDBType>;
+    postCollection = db.collection<PostDBType>(SETTINGS.PATH.POSTS) as any as Collection<PostDBType>;
+    userCollection = db.collection<UserDBType>(SETTINGS.PATH.USERS) as any as Collection<UserDBType>;
+    commentCollection = db.collection<CommentDBType>(SETTINGS.PATH.COMMENTS) as any as Collection<CommentDBType>;
+}

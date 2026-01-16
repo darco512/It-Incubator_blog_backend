@@ -28,10 +28,15 @@ usersRouter.get("/",
 })
 
 usersRouter.get("/:id",
+    objectIdValidationMiddleware,
     async (req: Request, res: Response) => {
 
         const result =  await usersRepository.findUserById(new ObjectId(getParamId(req.params.id)))
-        res.status(HTTP_STATUSES.OK_200).send(result)
+        if (!result) {
+            res.sendStatus(HTTP_STATUSES.NOT_FOUND_404)
+        } else {
+            res.status(HTTP_STATUSES.OK_200).send(result)
+        }
     })
 
 

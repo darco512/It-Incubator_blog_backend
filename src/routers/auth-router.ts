@@ -1,7 +1,7 @@
 import {Request, Response, Router} from "express";
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware'
 import {authInputsValidation} from "../input-output-types/auth-input-validations";
-import {usersService} from '../domain/users-service'
+import {authService} from '../domain/auth-service'
 import {HTTP_STATUSES} from "../utils";
 import {jwtService} from "../application/jwt-service";
 import {authMiddleware} from "../middlewares/auth-middleware";
@@ -13,7 +13,7 @@ authRouter.post('/login',
     authInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response,) => {
-    const user = await usersService.checkCredentials(req.body.loginOrEmail, req.body.password);
+    const user = await authService.checkCredentials(req.body.loginOrEmail, req.body.password);
     if(user){
         const token = await jwtService.createJWT(user)
         res.status(HTTP_STATUSES.OK_200).send({accessToken: token})
@@ -43,13 +43,20 @@ authRouter.get('/me',
 
 authRouter.post('/registration',
     async (req: Request, res: Response) => {
-        const user = await usersService.createUser(req.body.login, req.body.email, req.body.password)
-        res.status(201).send()
+        const user = await authService.createUser(req.body.login, req.body.email, req.body.password)
+        if (user) {
+            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+        } else {
+            res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
+                    message: 'If the inputModel has incorrect values (in particular if the user with the given email or login already exists)',
+                    field: 'loginOrEmail',
+                }]})
+        }
     })
 
 authRouter.post('/confirm-email',
     async (req: Request, res: Response,) => {
-        const result = await usersService.confirmEmail(req.body.code, req.body.email);
+        const result = await authService.confirmEmail(req.body.code, req.body.email);
         if(result){
             res.status(HTTP_STATUSES.NO_CONTENT_204).send({message: "Email was verified. Account was activated"})
         } else {
@@ -62,9 +69,9 @@ authRouter.post('/confirm-email',
 
 authRouter.post('/resend-registration-code',
     async (req: Request, res: Response) => {
-        const result = await usersService.resendCode(req.body.email);
+        const result = await authService.resendCode(req.body.email);
         if(result){
-            res.status(HTTP_STATUSES.NO_CONTENT_204).send({message:"Email was verified. Account was activated"})
+            res.status(HTTP_STATUSES.NO_CONTENT_204).send({message: "Input data is accepted. Email with confirmation code will be send to passed email address. Confirmation code should be inside link as query param, for example: https://some-front.com/confirm-registration?code=youtcodehere"})
         } else {
             res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
                     message: 'If the inputModel has incorrect values or if email is already confirmed',

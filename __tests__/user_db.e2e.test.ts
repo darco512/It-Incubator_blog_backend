@@ -6,7 +6,7 @@ import {
     UserViewModel
 } from "../src/input-output-types/types";
 import {ADMIN_PASSWORD, ADMIN_USERNAME} from "../src/middlewares/auth-middleware";
-import {userCollection, runDB} from "../src/db/mongo-db";
+import {userCollection, runDB, closeDB} from "../src/db/mongo-db";
 
 describe('/users', () => {
 
@@ -15,6 +15,11 @@ describe('/users', () => {
     beforeAll(async () => { // очистка базы данных перед началом тестирования
         await runDB(SETTINGS.MONGO_URL)
         await userCollection.deleteMany()
+    })
+
+    afterAll(async () => {
+        // Close database connection to prevent Jest from hanging
+        await closeDB()
     })
 
     it('should get empty array', async () => {
@@ -74,7 +79,7 @@ describe('/users', () => {
         const res = await req
             .post(SETTINGS.PATH.AUTH + '/login')
             .send(authData)
-            .expect(HTTP_STATUSES.NO_CONTENT_204)
+            .expect(HTTP_STATUSES.OK_200)
 
         console.log(res.body)
     });
