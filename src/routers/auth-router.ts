@@ -43,13 +43,13 @@ authRouter.get('/me',
 
 authRouter.post('/registration',
     async (req: Request, res: Response) => {
-        const user = await authService.createUser(req.body.login, req.body.email, req.body.password)
+        const user = await authService.createUser(req.body.login, req.body.password, req.body.email)
         if (user) {
-            res.sendStatus(HTTP_STATUSES.NO_CONTENT_204)
+            res.status(HTTP_STATUSES.NO_CONTENT_204).send({message: "Input data is accepted. Email with confirmation code will be send to passed email address. Confirmation code should be inside link as query param, for example: https://some-front.com/confirm-registration?code=youtcodehere"})
         } else {
             res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
                     message: 'If the inputModel has incorrect values (in particular if the user with the given email or login already exists)',
-                    field: 'loginOrEmail',
+                    field: 'email',
                 }]})
         }
     })

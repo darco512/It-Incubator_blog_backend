@@ -11,8 +11,11 @@ export class EmailAdapter {
                 user: process.env.EMAIL_FROM,
                 pass: process.env.EMAIL_FROM_PASSWORD,
             },
+            tls: {
+                rejectUnauthorized: false
+            }
         })
-        transporter.sendMail({
+        await transporter.sendMail({
             from: "Tony <darcohaha@gmail.com>",
             to: email,
             subject: subject,
