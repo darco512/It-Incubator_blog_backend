@@ -1,6 +1,7 @@
 import {Request, Response, Router} from "express";
 import {inputValidationMiddleware} from '../middlewares/input-validation-middleware'
 import {authInputsValidation} from "../input-output-types/auth-input-validations";
+import {userInputsValidation} from "../input-output-types/user-input-validations";
 import {authService} from '../domain/auth-service'
 import {HTTP_STATUSES} from "../utils";
 import {jwtService} from "../application/jwt-service";
@@ -43,6 +44,8 @@ authRouter.get('/me',
 
 
 authRouter.post('/registration',
+    userInputsValidation,
+    inputValidationMiddleware,
     async (req: Request, res: Response) => {
         // Check which field is duplicated before creating user
         const existingUserByLogin = await usersQueriesRepository.findUserByLogin(req.body.login);
