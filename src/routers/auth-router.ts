@@ -5,6 +5,7 @@ import {authService} from '../domain/auth-service'
 import {HTTP_STATUSES} from "../utils";
 import {jwtService} from "../application/jwt-service";
 import {authMiddleware} from "../middlewares/auth-middleware";
+import {usersQueriesRepository} from "../repositories/users-queries-repository";
 
 export const authRouter = Router();
 
@@ -43,13 +44,33 @@ authRouter.get('/me',
 
 authRouter.post('/registration',
     async (req: Request, res: Response) => {
-        const user = await authService.createUser(req.body.login, req.body.password, req.body.email)
+        // Check which field is duplicated before creating user
+        const existingUserByLogin = await usersQueriesRepository.findUserByLogin(req.body.login);
+        const existingUserByEmail = await usersQueriesRepository.findUserByEmail(req.body.email);
+        
+        if (existingUserByLogin) {
+            res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
+                message: 'If the inputModel has incorrect values (in particular if the user with the given email or login already exists)',
+                field: 'login',
+            }]})
+            return;
+        }
+        
+        if (existingUserByEmail) {
+            res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
+                message: 'If the inputModel has incorrect values (in particular if the user with the given email or login already exists)',
+                field: 'email',
+            }]})
+            return;
+        }
+        
+        const user = await authService.createUser(req.body.login, req.body.email, req.body.password)
         if (user) {
             res.status(HTTP_STATUSES.NO_CONTENT_204).send({message: "Input data is accepted. Email with confirmation code will be send to passed email address. Confirmation code should be inside link as query param, for example: https://some-front.com/confirm-registration?code=youtcodehere"})
         } else {
             res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
                     message: 'If the inputModel has incorrect values (in particular if the user with the given email or login already exists)',
-                    field: 'email',
+                    field: 'loginOrEmail',
                 }]})
         }
     })

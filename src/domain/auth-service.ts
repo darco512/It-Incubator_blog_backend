@@ -32,7 +32,7 @@ export const authService = {
                 expirationDate: addMinutes(new Date(), 3000),
             }
         }
-        const createResult = usersRepository.createUser(newUser);
+        const createResult = await usersRepository.createUser(newUser);
 
         const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(newUser)
         await EmailAdapter.sendEmail(newUser.email, 'Email confirmation', messageBody)
