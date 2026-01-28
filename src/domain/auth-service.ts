@@ -69,11 +69,13 @@ export const authService = {
     async resendCode(email: string){
         let user = await usersRepository.findByLoginOrEmail(email);
         if (!user){ return false}
-        if (!user.emailConfirmation.isConfirmed) {
-            const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(user)
-            await EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
-
+        if (user.emailConfirmation.isConfirmed) {
+            return false // Email already confirmed
         }
-        return false
+        
+        const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(user)
+        await EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
+        
+        return true // ✅ Success!
     }
 }

@@ -76,7 +76,7 @@ authRouter.post('/registration',
         }
     })
 
-authRouter.post('/confirm-email',
+authRouter.post('/registration-confirmation',
     async (req: Request, res: Response,) => {
         const result = await authService.confirmEmail(req.body.code, req.body.email);
         if(result){
@@ -89,7 +89,7 @@ authRouter.post('/confirm-email',
         }
     })
 
-authRouter.post('/resend-registration-code',
+authRouter.post('/registration-email-resending',
     async (req: Request, res: Response) => {
         const result = await authService.resendCode(req.body.email);
         if(result){
