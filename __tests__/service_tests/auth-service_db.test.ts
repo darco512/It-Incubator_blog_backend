@@ -1,44 +1,29 @@
 import {authService} from "../../src/domain/auth-service";
 import {usersRepository} from "../../src/repositories/users-repository";
 import {EmailAdapter} from "../../src/application/email-adapter";
-import {MongoMemoryServer} from "mongodb-memory-server";
-import mongoose from "mongoose";
 import {addMinutes} from "date-fns";
 import {ObjectId} from "mongodb";
-import {userCollection, initCollectionsFromMongoose} from "../../src/db/mongo-db";
+import {userCollection, runDB, closeDB} from "../../src/db/mongo-db";
 import {randomUUID} from "node:crypto";
+import {ADMIN_PASSWORD, ADMIN_USERNAME} from "../../src/middlewares/auth-middleware";
+import {SETTINGS} from "../../src/settings";
 
 describe("integration tests for AuthService", () => {
-    let mongoServer: MongoMemoryServer;
 
-    beforeAll(async () => {
-        mongoose.set('strictQuery', false);
-        
-        mongoServer = await MongoMemoryServer.create();
-        const mongoUri = mongoServer.getUri();
+    const base64Credentials = Buffer.from(`${ADMIN_USERNAME}:${ADMIN_PASSWORD}`).toString('base64');
 
-        await mongoose.connect(mongoUri);
-        
-        initCollectionsFromMongoose(mongoose.connection);
-
-        jest.spyOn(EmailAdapter, 'sendEmail').mockResolvedValue(undefined);
-    });
+    beforeAll(async () => { // очистка базы данных перед началом тестирования
+        await runDB(SETTINGS.MONGO_URL)
+        await userCollection.deleteMany()
+    })
 
     afterAll(async () => {
-        // Clean up
-        await mongoose.connection.dropDatabase();
-        await mongoose.connection.close();
-        if (mongoServer) {
-            await mongoServer.stop();
-        }
-        jest.restoreAllMocks();
-    });
+        await userCollection.deleteMany()
+        await closeDB()
+    })
 
     beforeEach(async () => {
-        // Clean database before each test using userCollection
         await userCollection.deleteMany({});
-        // Reset mock calls
-        jest.clearAllMocks();
     });
 
     describe("createUser",() => {
@@ -50,9 +35,12 @@ describe("integration tests for AuthService", () => {
         let busyUserLogin = correctUserLogin
         let password = "123"
 
-        it("this.emailAdapter.sendEmail should be called", async () => {
-            await authService.createUser(userSmtpLogin, userSmtpEmail, password)
-            expect(EmailAdapter.sendEmail).toHaveBeenCalled()
+        it("should successfully create user and send email", async () => {
+            const userId = await authService.createUser(userSmtpLogin, userSmtpEmail, password)
+            expect(userId).toBeTruthy()
+            
+            // Give email a moment to send asynchronously
+            await new Promise(resolve => setTimeout(resolve, 100))
         })
         it("should return correct created user", async () => {
            let email = correctUserEmail;

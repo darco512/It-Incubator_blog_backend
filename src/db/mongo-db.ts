@@ -64,3 +64,11 @@ export function initCollectionsFromMongoose(mongooseConnection: typeof mongoose.
     userCollection = db.collection<UserDBType>(SETTINGS.PATH.USERS) as any as Collection<UserDBType>;
     commentCollection = db.collection<CommentDBType>(SETTINGS.PATH.COMMENTS) as any as Collection<CommentDBType>;
 }
+
+// Close database connection
+export async function closeDB(): Promise<void> {
+    if (client) {
+        await client.close();
+        client = null;
+    }
+}
