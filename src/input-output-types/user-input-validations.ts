@@ -33,7 +33,7 @@ export const emailValidation = body("email")
     .withMessage("email should be a string")
     .trim()
     .custom(value => {
-        const pattern = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+        const pattern = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
         return value.match(pattern);
     })
     .withMessage("Wrong email format.")

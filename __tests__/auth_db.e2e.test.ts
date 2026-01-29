@@ -72,6 +72,19 @@ describe('/auth', () => {
         createdUser = res.body
     })
 
+    it('should create user by test', async () => {
+
+        const res = await req
+            .post(SETTINGS.PATH.AUTH + "/registration")
+            .send({"password":"qwerty1","email":"vantreytest1+mkzxdfoxb03r@yandex.com","login":"ulogin"}) // отправка данных
+            .expect(HTTP_STATUSES.NO_CONTENT_204)
+
+        console.log(res.body)
+
+        createdUser = res.body
+    })
+
+
     it('shouldnt create user', async () => {
         const res = await req
             .post(SETTINGS.PATH.AUTH + "/registration")
