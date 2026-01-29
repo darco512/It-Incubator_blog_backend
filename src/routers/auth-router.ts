@@ -78,13 +78,13 @@ authRouter.post('/registration',
 
 authRouter.post('/registration-confirmation',
     async (req: Request, res: Response,) => {
-        const result = await authService.confirmEmail(req.body.code, req.body.email);
+        const result = await authService.confirmEmail(req.body.code);
         if(result){
             res.status(HTTP_STATUSES.NO_CONTENT_204).send({message: "Email was verified. Account was activated"})
         } else {
             res.status(HTTP_STATUSES.BAD_REQUEST_400).send({errorsMessages: [{
                     message: 'If the confirmation code is incorrect, expired or already been applied',
-                    field: 'verificationCode',
+                    field: 'code',
                 }]})
         }
     })

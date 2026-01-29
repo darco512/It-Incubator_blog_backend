@@ -57,25 +57,33 @@ export const authService = {
         return hash;
     },
 
-    async confirmEmail(code: string, email: string): Promise<boolean> {
-        let user = await usersRepository.findByLoginOrEmail(email);
+    async confirmEmail(code: string): Promise<boolean> {
+        let user = await usersRepository.findByConfirmationCode(code);
         if (!user){ return false}
-        if (user.emailConfirmation.confirmationCode === code && user.emailConfirmation.expirationDate > new Date()){
-            return await usersRepository.updateConfirmation(user._id)
-        }
-        return false
+        if (user.emailConfirmation.isConfirmed){ return false}
+        if (user.emailConfirmation.expirationDate < new Date()){ return false}
+        return await usersRepository.updateConfirmation(user._id)
     },
 
     async resendCode(email: string){
         let user = await usersRepository.findByLoginOrEmail(email);
         if (!user){ return false}
-        if (user.emailConfirmation.isConfirmed) {
-            return false // Email already confirmed
+        if (!user.emailConfirmation.isConfirmed) {
+            // Generate NEW confirmation code
+            const newCode = randomUUID()
+            const newExpiration = addMinutes(new Date(), 3000)
+            
+            // Update in database
+            await usersRepository.updateConfirmationCode(user._id, newCode, newExpiration)
+            
+            // Update user object for email template
+            user.emailConfirmation.confirmationCode = newCode
+            user.emailConfirmation.expirationDate = newExpiration
+            
+            const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(user)
+            await EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
+            return true
         }
-        
-        const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(user)
-        await EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
-        
-        return true // ✅ Success!
+        return false
     }
 }

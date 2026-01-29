@@ -30,11 +30,25 @@ export const usersRepository = {
         const res = await userCollection.deleteOne({_id})
         return res.deletedCount === 1
     },
-
+    async findByConfirmationCode(code: string) {
+        const user = await userCollection.findOne({ "emailConfirmation.confirmationCode": code })
+        return user
+    },
     async updateConfirmation(_id: ObjectId): Promise<boolean> {
         const result = await userCollection.updateOne(
             { _id },
             { $set: { "emailConfirmation.isConfirmed": true } }
+        )
+        return result.matchedCount === 1
+    },
+
+    async updateConfirmationCode(_id: ObjectId, code: string, expirationDate: Date): Promise<boolean> {
+        const result = await userCollection.updateOne(
+            { _id },
+            { $set: { 
+                "emailConfirmation.confirmationCode": code,
+                "emailConfirmation.expirationDate": expirationDate
+            }}
         )
         return result.matchedCount === 1
     }
