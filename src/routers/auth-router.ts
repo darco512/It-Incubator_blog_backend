@@ -44,6 +44,8 @@ authRouter.get('/me',
 
 
 authRouter.post('/registration',
+    userInputsValidation,
+    inputValidationMiddleware,
     async (req: Request, res: Response) => {
         // Check which field is duplicated before creating user
         const existingUserByLogin = await usersQueriesRepository.findUserByLogin(req.body.login);

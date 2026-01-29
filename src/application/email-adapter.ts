@@ -68,7 +68,12 @@ export class EmailAdapter {
         })
         
         console.log('✅ Email sent via Gmail API (HTTPS)!', result.data.id)
-        return result.data
+        // Return format compatible with nodemailer
+        return {
+            messageId: result.data.id || `gmail-${Date.now()}`,
+            accepted: [email],
+            rejected: []
+        }
     }
     
     // SMTP fallback for local development
