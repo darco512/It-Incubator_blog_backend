@@ -163,7 +163,7 @@ authRouter.post('/logout',
             expirationDate: new Date(payload.exp * 1000)
         });
         res.clearCookie('refreshToken', { httpOnly: true, secure: true });
-        res.sendStatus(HTTP_STATUSES.OK_200);
+        res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     })
 
 
