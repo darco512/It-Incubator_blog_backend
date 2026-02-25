@@ -16,7 +16,7 @@ app.use(cookieParser())
 
 app.get('/', (req, res) => {
     // эндпоинт, который будет показывать на верселе какая версия бэкэнда сейчас залита
-    res.status(200).json({version: '8.0'})
+    res.status(200).json({version: '8.1'})
 })
 const parserMiddleware = bodyParser.urlencoded({ extended: true })
 
