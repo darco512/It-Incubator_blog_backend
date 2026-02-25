@@ -14,6 +14,7 @@ export const SETTINGS = {
         AUTH: '/auth',
         USERS: '/users',
         COMMENTS: '/comments',
+        BLACKLIST: '/blacklist',
     },
     MONGO_URL: process.env.MONGO_URL || "mongodb://0.0.0.0:27017",
     DB_NAME: process.env.DB_NAME || "test",

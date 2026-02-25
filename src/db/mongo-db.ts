@@ -1,9 +1,8 @@
 import { Collection, MongoClient } from 'mongodb';
-import {BlogDBType, CommentDBType, PostDBType, UserDBType} from "../input-output-types/types";
+import {BlackListDBType, BlogDBType, CommentDBType, PostDBType, UserDBType} from "../input-output-types/types";
 import {SETTINGS} from "../settings";
 import * as dotenv from "dotenv";
 import mongoose from 'mongoose'
-import {EmailConfirmationType, InputUserType} from "../input-output-types/types"
 dotenv.config();
 
 let client: MongoClient | null = null;
@@ -13,7 +12,7 @@ export let blogCollection!: Collection<BlogDBType>;
 export let postCollection!: Collection<PostDBType>;
 export let userCollection!: Collection<UserDBType>;
 export let commentCollection!: Collection<CommentDBType>;
-
+export let blackListCollection!: Collection<BlackListDBType>;
 
 export async function runDB(url: string): Promise<boolean> {
     try {
@@ -38,6 +37,7 @@ export async function runDB(url: string): Promise<boolean> {
         postCollection = db.collection<PostDBType>(SETTINGS.PATH.POSTS)
         userCollection = db.collection<UserDBType>(SETTINGS.PATH.USERS)
         commentCollection = db.collection<CommentDBType>(SETTINGS.PATH.COMMENTS)
+        blackListCollection = db.collection<BlackListDBType>(SETTINGS.PATH.BLACKLIST)
 
         console.log("Database Connected");
         return true;
@@ -63,6 +63,7 @@ export function initCollectionsFromMongoose(mongooseConnection: typeof mongoose.
     postCollection = db.collection<PostDBType>(SETTINGS.PATH.POSTS) as any as Collection<PostDBType>;
     userCollection = db.collection<UserDBType>(SETTINGS.PATH.USERS) as any as Collection<UserDBType>;
     commentCollection = db.collection<CommentDBType>(SETTINGS.PATH.COMMENTS) as any as Collection<CommentDBType>;
+    blackListCollection = db.collection<BlackListDBType>(SETTINGS.PATH.BLACKLIST) as any as Collection<BlackListDBType>;
 }
 
 // Close database connection

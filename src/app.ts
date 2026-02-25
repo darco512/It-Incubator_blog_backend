@@ -7,13 +7,16 @@ import {testingRouter} from "./routers/testing-router";
 import {authRouter} from "./routers/auth-router";
 import {usersRouter} from "./routers/users-router";
 import {commentsRouter} from "./routers/comments-router";
+import cookieParser from "cookie-parser";
 
 export const app = express() // создать приложение
 app.use(express.json()) // создание свойств-объектов body во всех реквестах
+app.use(cookieParser())
+
 
 app.get('/', (req, res) => {
     // эндпоинт, который будет показывать на верселе какая версия бэкэнда сейчас залита
-    res.status(200).json({version: '7.1'})
+    res.status(200).json({version: '8.0'})
 })
 const parserMiddleware = bodyParser.urlencoded({ extended: true })
 

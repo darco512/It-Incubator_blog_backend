@@ -7,6 +7,8 @@ import {HTTP_STATUSES} from "../utils";
 import {jwtService} from "../application/jwt-service";
 import {authMiddleware} from "../middlewares/auth-middleware";
 import {usersQueriesRepository} from "../repositories/users-queries-repository";
+import {usersRepository} from "../repositories/users-repository";
+import {blackListRepository} from "../repositories/black-list-repository";
 
 export const authRouter = Router();
 
@@ -17,8 +19,10 @@ authRouter.post('/login',
     async (req: Request, res: Response,) => {
     const user = await authService.checkCredentials(req.body.loginOrEmail, req.body.password);
     if(user){
-        const token = await jwtService.createJWT(user)
-        res.status(HTTP_STATUSES.OK_200).send({accessToken: token})
+        const accessToken = await jwtService.createAccessJWT(user)
+        const refreshToken = await jwtService.createRefreshJWT(user)
+        res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true});
+        res.status(HTTP_STATUSES.OK_200).send({accessToken: accessToken})
     } else {
         res.status(HTTP_STATUSES.UNAUTHORIZED_401).send({errorsMessages: [{
         message: 'Credentials doesn\'t mathc',
@@ -26,6 +30,37 @@ authRouter.post('/login',
         }]})
     }
 })
+
+
+authRouter.post('/refresh-token',
+    authInputsValidation,
+    inputValidationMiddleware,
+    async (req: Request, res: Response,) => {
+        if(req.cookies.refreshToken) {
+            const tokenFromCookies = req.cookies.refreshToken
+            const userId = await jwtService.getUserByToken(tokenFromCookies)
+            if(userId){
+                const user = await usersRepository.findUserById(userId)
+                if (user) {
+                    const payload = await jwtService.getRefreshTokenPayload(tokenFromCookies);
+                    if (!payload) {
+                        res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+                        return;
+                    }
+                    await blackListRepository.create({
+                        token: tokenFromCookies,
+                        expirationDate: new Date(payload.exp * 1000)
+                    });
+                    const accessToken = await jwtService.createAccessJWT(user)
+                    const refreshToken = await jwtService.createRefreshJWT(user)
+                    res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true});
+                    res.status(HTTP_STATUSES.OK_200).send({accessToken: accessToken})
+                } else {
+                    res.status(HTTP_STATUSES.UNAUTHORIZED_401)
+                }
+            }
+        }
+    })
 
 authRouter.get('/me',
     authMiddleware,
@@ -103,3 +138,24 @@ authRouter.post('/registration-email-resending',
                 }]})
         }
     })
+
+authRouter.post('/logout',
+    async (req: Request, res: Response) => {
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
+        const payload = await jwtService.getRefreshTokenPayload(refreshToken);
+        if (!payload) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
+        await blackListRepository.create({
+            token: refreshToken,
+            expirationDate: new Date(payload.exp * 1000)
+        });
+        res.clearCookie('refreshToken', { httpOnly: true, secure: true });
+        res.sendStatus(HTTP_STATUSES.OK_200);
+    })
+

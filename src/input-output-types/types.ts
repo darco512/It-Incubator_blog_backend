@@ -152,3 +152,14 @@ export type CommentDBType = {
     }
     createdAt: string
 }
+
+export type BlackListDBType = {
+    _id: ObjectId
+    token: string
+    expirationDate: Date
+}
+
+export type BlackListType = {
+    token: string
+    expirationDate: Date
+}
