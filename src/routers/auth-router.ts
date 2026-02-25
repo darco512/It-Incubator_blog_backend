@@ -33,32 +33,35 @@ authRouter.post('/login',
 
 
 authRouter.post('/refresh-token',
-    async (req: Request, res: Response,) => {
-        if(req.cookies.refreshToken) {
-            const tokenFromCookies = req.cookies.refreshToken
-            if(!tokenFromCookies){
-                res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
-                return;
-            }
-            const payload = await jwtService.getRefreshTokenPayload(tokenFromCookies);
-            if (!payload) {
-                res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
-                return;
-            }
-            const user = await usersRepository.findUserById(payload.userId);               
-            if (!user) {
-                res.status(HTTP_STATUSES.UNAUTHORIZED_401)
-                return;
-            }
-            await blackListRepository.create({
-                token: tokenFromCookies,
-                expirationDate: new Date(payload.exp * 1000)
-            });
-            const accessToken = await jwtService.createAccessJWT(user)
-            const refreshToken = await jwtService.createRefreshJWT(user)
-            res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true});
-            res.status(HTTP_STATUSES.OK_200).send({accessToken: accessToken})
+    async (req: Request, res: Response) => {
+        const tokenFromCookies = req.cookies?.refreshToken;
+        if (!tokenFromCookies) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
         }
+        const payload = await jwtService.getRefreshTokenPayload(tokenFromCookies);
+        if (!payload) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
+        const blacklisted = await blackListRepository.findByToken(tokenFromCookies);
+        if (blacklisted) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
+        const user = await usersRepository.findUserById(payload.userId);
+        if (!user) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
+        await blackListRepository.create({
+            token: tokenFromCookies,
+            expirationDate: new Date(payload.exp * 1000)
+        });
+        const accessToken = await jwtService.createAccessJWT(user);
+        const refreshToken = await jwtService.createRefreshJWT(user);
+        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+        res.status(HTTP_STATUSES.OK_200).send({ accessToken });
     })
 
 authRouter.get('/me',
@@ -140,8 +143,13 @@ authRouter.post('/registration-email-resending',
 
 authRouter.post('/logout',
     async (req: Request, res: Response) => {
-        const refreshToken = req.cookies.refreshToken;
+        const refreshToken = req.cookies?.refreshToken;
         if (!refreshToken) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
+        const blacklisted = await blackListRepository.findByToken(refreshToken);
+        if (blacklisted) {
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
@@ -157,4 +165,5 @@ authRouter.post('/logout',
         res.clearCookie('refreshToken', { httpOnly: true, secure: true });
         res.sendStatus(HTTP_STATUSES.OK_200);
     })
+
 

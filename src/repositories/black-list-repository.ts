@@ -16,4 +16,8 @@ export const blackListRepository = {
             return null
         }
     },
+
+    async findByToken(token: string): Promise<BlackListDBType | null> {
+        return blackListCollection.findOne({ token });
+    },
 }
