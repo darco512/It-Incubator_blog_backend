@@ -1,5 +1,5 @@
-import { Collection, MongoClient } from 'mongodb';
-import {BlackListDBType, BlogDBType, CommentDBType, PostDBType, UserDBType} from "../input-output-types/types";
+﻿import { Collection, MongoClient } from 'mongodb';
+import {BlogDBType, CommentDBType, PostDBType, RequestsDBType, SessionDBType, UserDBType} from "../input-output-types/types";
 import {SETTINGS} from "../settings";
 import * as dotenv from "dotenv";
 import mongoose from 'mongoose'
@@ -7,25 +7,22 @@ dotenv.config();
 
 let client: MongoClient | null = null;
 
-// Collections - will be initialized when DB connects
 export let blogCollection!: Collection<BlogDBType>;
 export let postCollection!: Collection<PostDBType>;
 export let userCollection!: Collection<UserDBType>;
 export let commentCollection!: Collection<CommentDBType>;
-export let blackListCollection!: Collection<BlackListDBType>;
+export let requestCollection!: Collection<RequestsDBType>;
+export let sessionsCollection!: Collection<SessionDBType>;
 
 export async function runDB(url: string): Promise<boolean> {
     try {
-        // Reuse existing client if available (for serverless)
         if (!client) {
             client = new MongoClient(url)
             await client.connect()
         } else {
-            // Test if connection is still alive
             try {
                 await client.db('admin').command({ ping: 1 });
             } catch {
-                // Connection lost, reconnect
                 await client.connect();
             }
         }
@@ -37,8 +34,8 @@ export async function runDB(url: string): Promise<boolean> {
         postCollection = db.collection<PostDBType>(SETTINGS.PATH.POSTS)
         userCollection = db.collection<UserDBType>(SETTINGS.PATH.USERS)
         commentCollection = db.collection<CommentDBType>(SETTINGS.PATH.COMMENTS)
-        blackListCollection = db.collection<BlackListDBType>(SETTINGS.PATH.BLACKLIST)
-
+        requestCollection = db.collection<RequestsDBType>(SETTINGS.PATH.RAQUESTS)
+        sessionsCollection = db.collection<SessionDBType>(SETTINGS.PATH.SESSIONS)
         console.log("Database Connected");
         return true;
     }
@@ -52,7 +49,6 @@ export async function runDB(url: string): Promise<boolean> {
     }
 }
 
-// Initialize collections from mongoose connection (for testing)
 export function initCollectionsFromMongoose(mongooseConnection: typeof mongoose.connection): void {
     const db = mongooseConnection.db;
     if (!db) {
@@ -63,10 +59,10 @@ export function initCollectionsFromMongoose(mongooseConnection: typeof mongoose.
     postCollection = db.collection<PostDBType>(SETTINGS.PATH.POSTS) as any as Collection<PostDBType>;
     userCollection = db.collection<UserDBType>(SETTINGS.PATH.USERS) as any as Collection<UserDBType>;
     commentCollection = db.collection<CommentDBType>(SETTINGS.PATH.COMMENTS) as any as Collection<CommentDBType>;
-    blackListCollection = db.collection<BlackListDBType>(SETTINGS.PATH.BLACKLIST) as any as Collection<BlackListDBType>;
+    requestCollection = db.collection<RequestsDBType>(SETTINGS.PATH.RAQUESTS) as any as Collection<RequestsDBType>;
+    sessionsCollection = db.collection<SessionDBType>(SETTINGS.PATH.SESSIONS) as any as Collection<SessionDBType>;
 }
 
-// Close database connection
 export async function closeDB(): Promise<void> {
     if (client) {
         await client.close();

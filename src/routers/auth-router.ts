@@ -1,28 +1,60 @@
-import {Request, Response, Router} from "express";
-import {inputValidationMiddleware} from '../middlewares/input-validation-middleware'
+﻿import {Request, Response, Router} from "express";
+import {randomUUID} from "crypto";
+import {inputValidationMiddleware} from '../middlewares/input-validation-middleware';
+import {rateLimitMiddleware} from "../middlewares/rate-limit-middleware";
 import {authInputsValidation} from "../input-output-types/auth-input-validations";
 import {userInputsValidation} from "../input-output-types/user-input-validations";
 import {authService} from '../domain/auth-service'
-import {HTTP_STATUSES} from "../utils";
+import {HTTP_STATUSES, getClientIp} from "../utils";
 import {jwtService} from "../application/jwt-service";
 import {authMiddleware} from "../middlewares/auth-middleware";
 import {usersQueriesRepository} from "../repositories/users-queries-repository";
 import {usersRepository} from "../repositories/users-repository";
-import {blackListRepository} from "../repositories/black-list-repository";
+import {sessionsRepository} from "../repositories/sessions-repository";
+import {SETTINGS} from "../settings";
 
 export const authRouter = Router();
 
+function resolveDeviceId(body: {deviceId?: unknown}): string {
+    if (typeof body.deviceId === "string" && body.deviceId.trim() !== "") {
+        return body.deviceId.trim();
+    }
+    return randomUUID();
+}
+
+function deviceTitleFromLoginUserAgent(req: Request): string {
+    const ua = req.get("user-agent");
+    if (typeof ua === "string" && ua.trim() !== "") {
+        return ua.trim().slice(0, 512);
+    }
+    return SETTINGS.DEFAULT_DEVICE_TITLE;
+}
 
 authRouter.post('/login',
+    rateLimitMiddleware,
     authInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response,) => {
     const user = await authService.checkCredentials(req.body.loginOrEmail, req.body.password);
     if(user){
+        const deviceId = resolveDeviceId(req.body)
         const accessToken = await jwtService.createAccessJWT(user)
-        const refreshToken = await jwtService.createRefreshJWT(user)
+        const refreshToken = await jwtService.createRefreshJWT(user, deviceId)
+        const times = jwtService.getJwtTimes(refreshToken)
+        const deviceName = deviceTitleFromLoginUserAgent(req)
+        const ip = getClientIp(req)
+        if (times) {
+            await sessionsRepository.upsertByUserAndDevice({
+                userId: user._id,
+                deviceId,
+                deviceName,
+                ip,
+                iat: times.iat,
+                exp: times.exp,
+            })
+        }
         res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true});
-        res.status(HTTP_STATUSES.OK_200).send({accessToken: accessToken})
+        res.status(HTTP_STATUSES.OK_200).send({accessToken, deviceId})
     } else {
         res.status(HTTP_STATUSES.UNAUTHORIZED_401).send({errorsMessages: [{
         message: 'Credentials doesn\'t mathc',
@@ -44,22 +76,31 @@ authRouter.post('/refresh-token',
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
-        const blacklisted = await blackListRepository.findByToken(tokenFromCookies);
-        if (blacklisted) {
-            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
-            return;
-        }
         const user = await usersRepository.findUserById(payload.userId);
         if (!user) {
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
-        await blackListRepository.create({
-            token: tokenFromCookies,
-            expirationDate: new Date(payload.exp * 1000)
-        });
         const accessToken = await jwtService.createAccessJWT(user);
-        const refreshToken = await jwtService.createRefreshJWT(user);
+        const refreshToken = await jwtService.createRefreshJWT(user, payload.deviceId);
+        const times = jwtService.getJwtTimes(refreshToken)
+        const ip = getClientIp(req)
+        if (!times) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
+        const bumped = await sessionsRepository.bumpSessionAfterRefresh(
+            payload.userId,
+            payload.deviceId,
+            payload.iat,
+            ip,
+            times.iat,
+            times.exp,
+        )
+        if (!bumped) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
         res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
         res.status(HTTP_STATUSES.OK_200).send({ accessToken });
     })
@@ -81,10 +122,10 @@ authRouter.get('/me',
 
 
 authRouter.post('/registration',
+    rateLimitMiddleware,
     userInputsValidation,
     inputValidationMiddleware,
     async (req: Request, res: Response) => {
-        // Check which field is duplicated before creating user
         const existingUserByLogin = await usersQueriesRepository.findUserByLogin(req.body.login);
         const existingUserByEmail = await usersQueriesRepository.findUserByEmail(req.body.email);
         
@@ -116,6 +157,7 @@ authRouter.post('/registration',
     })
 
 authRouter.post('/registration-confirmation',
+    rateLimitMiddleware,
     async (req: Request, res: Response,) => {
         const result = await authService.confirmEmail(req.body.code);
         if(result){
@@ -129,6 +171,7 @@ authRouter.post('/registration-confirmation',
     })
 
 authRouter.post('/registration-email-resending',
+    rateLimitMiddleware,
     async (req: Request, res: Response) => {
         const result = await authService.resendCode(req.body.email);
         if(result){
@@ -148,22 +191,13 @@ authRouter.post('/logout',
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
-        const blacklisted = await blackListRepository.findByToken(refreshToken);
-        if (blacklisted) {
-            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
-            return;
-        }
         const payload = await jwtService.getRefreshTokenPayload(refreshToken);
         if (!payload) {
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
-        await blackListRepository.create({
-            token: refreshToken,
-            expirationDate: new Date(payload.exp * 1000)
-        });
+        await sessionsRepository.deleteByUserAndDevice(payload.userId, payload.deviceId);
         res.clearCookie('refreshToken', { httpOnly: true, secure: true });
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     })
-
 

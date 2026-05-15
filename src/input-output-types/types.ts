@@ -153,13 +153,26 @@ export type CommentDBType = {
     createdAt: string
 }
 
-export type BlackListDBType = {
-    _id: ObjectId
-    token: string
-    expirationDate: Date
+export type RequestsDBType = {
+    IP: string
+    URL: string
+    date: Date
+}
+export type SessionDBInputType = {
+    userId: ObjectId
+    deviceId: string
+    deviceName: string
+    ip: string
+    iat: Date
+    exp: Date
 }
 
-export type BlackListType = {
-    token: string
-    expirationDate: Date
+export type SessionDBType = {_id: ObjectId} & SessionDBInputType;
+
+export type UserDeviceSessionViewType = {
+    ip: string
+    title: string
+    lastActiveDate: string
+    deviceId: string
 }
+
