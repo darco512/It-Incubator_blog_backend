@@ -76,13 +76,22 @@ authRouter.post('/refresh-token',
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
+        const session = await sessionsRepository.findActiveSession(
+            payload.userId,
+            payload.deviceId,
+            payload.iat,
+        );
+        if (!session) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
         const user = await usersRepository.findUserById(payload.userId);
         if (!user) {
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
         const accessToken = await jwtService.createAccessJWT(user);
-        const refreshToken = await jwtService.createRefreshJWT(user, payload.deviceId);
+        const refreshToken = await jwtService.createRefreshJWT(user, payload.deviceId, payload.iat);
         const times = jwtService.getJwtTimes(refreshToken)
         const ip = getClientIp(req)
         if (!times) {
@@ -196,7 +205,20 @@ authRouter.post('/logout',
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
-        await sessionsRepository.deleteByUserAndDevice(payload.userId, payload.deviceId);
+        const session = await sessionsRepository.findActiveSession(
+            payload.userId,
+            payload.deviceId,
+            payload.iat,
+        );
+        if (!session) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
+        await sessionsRepository.deleteByUserAndDevice(
+            payload.userId,
+            payload.deviceId,
+            payload.iat,
+        );
         res.clearCookie('refreshToken', getRefreshCookieOptions(req));
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     })

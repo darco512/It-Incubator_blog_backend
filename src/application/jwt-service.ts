@@ -9,20 +9,24 @@ export const jwtService = {
         return jwt.sign({userId: user._id}, SETTINGS.JWT_SECRET, {expiresIn: '10s'})
     },
 
-    async createRefreshJWT(user: UserDBType, deviceId: string) {
+    async createRefreshJWT(user: UserDBType, deviceId: string, previousIatSeconds?: number) {
+        let iatSeconds = Math.floor(Date.now() / 1000)
+        if (previousIatSeconds !== undefined && iatSeconds <= previousIatSeconds) {
+            iatSeconds = previousIatSeconds + 1
+        }
         return jwt.sign(
-            {userId: user._id.toString(), deviceId},
+            {userId: user._id.toString(), deviceId, sessionIat: iatSeconds},
             SETTINGS.JWT_SECRET,
-            {expiresIn: '20s'},
+            {expiresIn: '20s', noTimestamp: true},
         )
     },
 
     getJwtTimes(token: string): {iat: Date; exp: Date} | null {
-        const d = jwt.decode(token) as {iat?: number; exp?: number} | null
-        if (d?.iat === undefined || d?.exp === undefined) {
+        const d = jwt.decode(token) as {sessionIat?: number; exp?: number} | null
+        if (d?.sessionIat === undefined || d?.exp === undefined) {
             return null
         }
-        return {iat: new Date(d.iat * 1000), exp: new Date(d.exp * 1000)}
+        return {iat: new Date(d.sessionIat * 1000), exp: new Date(d.exp * 1000)}
     },
 
     async getUserByToken(token: string) {
@@ -45,12 +49,12 @@ export const jwtService = {
             if (typeof payload !== 'object' || payload === null) {
                 return null
             }
-            const p = payload as {userId?: string; deviceId?: string; iat?: number; exp?: number}
+            const p = payload as {userId?: string; deviceId?: string; sessionIat?: number; exp?: number}
             if (
                 typeof p.userId !== 'string' ||
                 typeof p.deviceId !== 'string' ||
                 !p.deviceId.trim() ||
-                typeof p.iat !== 'number' ||
+                typeof p.sessionIat !== 'number' ||
                 typeof p.exp !== 'number'
             ) {
                 return null
@@ -58,7 +62,7 @@ export const jwtService = {
             return {
                 userId: new ObjectId(p.userId),
                 deviceId: p.deviceId.trim(),
-                iat: p.iat,
+                iat: p.sessionIat,
                 exp: p.exp,
             }
         } catch {
@@ -66,5 +70,3 @@ export const jwtService = {
         }
     },
 }
-
-

@@ -1,4 +1,4 @@
-import request from 'supertest'
+import request, {Response} from 'supertest'
 import {req} from './test-helpers'
 import {app} from '../src/app'
 import {SETTINGS} from "../src/settings";
@@ -7,6 +7,19 @@ import {UserInputType} from "../src/input-output-types/types";
 import {ADMIN_PASSWORD, ADMIN_USERNAME} from "../src/middlewares/auth-middleware";
 import {runDB, requestCollection} from "../src/db/mongo-db";
 import {randomUUID} from "crypto";
+
+function getRefreshTokenFromResponse(res: Response): string {
+    const setCookie = res.headers['set-cookie'];
+    if (!setCookie) {
+        return '';
+    }
+    const cookies = Array.isArray(setCookie) ? setCookie : [setCookie];
+    const line = cookies.find((c) => c.startsWith('refreshToken='));
+    if (!line) {
+        return '';
+    }
+    return line.split(';')[0].replace('refreshToken=', '');
+}
 
 describe('/security', () => {
     const security = SETTINGS.PATH.SECURITY;
@@ -155,5 +168,155 @@ describe('/security', () => {
 
         expect(res.body).toHaveLength(1);
         expect(res.body[0].deviceId).toBe(currentDeviceId);
+    });
+
+    describe('refresh token lifecycle (incubator)', () => {
+        it('should invalidate old refresh token after refresh-token', async () => {
+            const deviceId = randomUUID();
+
+            const loginRes = await req
+                .post(`${auth}/login`)
+                .send({loginOrEmail: user.login, password: user.password, deviceId})
+                .expect(HTTP_STATUSES.OK_200);
+
+            const oldRefreshToken = getRefreshTokenFromResponse(loginRes);
+
+            await req
+                .post(`${auth}/refresh-token`)
+                .expect(HTTP_STATUSES.OK_200);
+
+            await request(app)
+                .post(`${auth}/refresh-token`)
+                .set('Cookie', `refreshToken=${oldRefreshToken}`)
+                .expect(HTTP_STATUSES.UNAUTHORIZED_401);
+
+            await request(app)
+                .post(`${auth}/logout`)
+                .set('Cookie', `refreshToken=${oldRefreshToken}`)
+                .expect(HTTP_STATUSES.UNAUTHORIZED_401);
+        });
+
+        it('should return devices after refresh-token with same deviceId and updated lastActiveDate', async () => {
+            const deviceId = randomUUID();
+
+            await req
+                .post(`${auth}/login`)
+                .send({loginOrEmail: user.login, password: user.password, deviceId})
+                .expect(HTTP_STATUSES.OK_200);
+
+            const beforeRefresh = await req
+                .get(`${security}/devices`)
+                .expect(HTTP_STATUSES.OK_200);
+
+            const deviceBefore = beforeRefresh.body.find((s: {deviceId: string}) => s.deviceId === deviceId);
+            expect(deviceBefore).toBeDefined();
+
+            await req
+                .post(`${auth}/refresh-token`)
+                .expect(HTTP_STATUSES.OK_200);
+
+            const afterRefresh = await req
+                .get(`${security}/devices`)
+                .expect(HTTP_STATUSES.OK_200);
+
+            const deviceAfter = afterRefresh.body.find((s: {deviceId: string}) => s.deviceId === deviceId);
+            expect(deviceAfter).toBeDefined();
+            expect(deviceAfter.deviceId).toBe(deviceId);
+            expect(deviceAfter.lastActiveDate).not.toBe(deviceBefore.lastActiveDate);
+        });
+
+        it('should return 401 on logout with old refresh token after DELETE /security/devices/:deviceId', async () => {
+            const deviceId = randomUUID();
+
+            const loginRes = await req
+                .post(`${auth}/login`)
+                .send({loginOrEmail: user.login, password: user.password, deviceId})
+                .expect(HTTP_STATUSES.OK_200);
+
+            const oldRefreshToken = getRefreshTokenFromResponse(loginRes);
+
+            await req
+                .delete(`${security}/devices/${deviceId}`)
+                .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+            await request(app)
+                .post(`${auth}/logout`)
+                .set('Cookie', `refreshToken=${oldRefreshToken}`)
+                .expect(HTTP_STATUSES.UNAUTHORIZED_401);
+        });
+
+        it('should return 401 on second logout with same refresh token', async () => {
+            const loginRes = await req
+                .post(`${auth}/login`)
+                .send({loginOrEmail: user.login, password: user.password})
+                .expect(HTTP_STATUSES.OK_200);
+
+            const refreshToken = getRefreshTokenFromResponse(loginRes);
+
+            await req
+                .post(`${auth}/logout`)
+                .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+            await request(app)
+                .post(`${auth}/logout`)
+                .set('Cookie', `refreshToken=${refreshToken}`)
+                .expect(HTTP_STATUSES.UNAUTHORIZED_401);
+        });
+
+        it('should return 401 on logout with terminated device refresh token after DELETE /security/devices', async () => {
+            const otherDeviceId = randomUUID();
+            const currentDeviceId = randomUUID();
+
+            const otherLoginRes = await req
+                .post(`${auth}/login`)
+                .send({loginOrEmail: user.login, password: user.password, deviceId: otherDeviceId})
+                .expect(HTTP_STATUSES.OK_200);
+
+            const otherRefreshToken = getRefreshTokenFromResponse(otherLoginRes);
+
+            await req
+                .post(`${auth}/login`)
+                .send({loginOrEmail: user.login, password: user.password, deviceId: currentDeviceId})
+                .expect(HTTP_STATUSES.OK_200);
+
+            await req
+                .delete(`${security}/devices`)
+                .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+            await request(app)
+                .post(`${auth}/logout`)
+                .set('Cookie', `refreshToken=${otherRefreshToken}`)
+                .expect(HTTP_STATUSES.UNAUTHORIZED_401);
+
+            await req
+                .get(`${security}/devices`)
+                .expect(HTTP_STATUSES.OK_200);
+        });
+
+        it('should return device list without logged-out device after terminating another session', async () => {
+            const terminatedDeviceId = randomUUID();
+            const currentDeviceId = randomUUID();
+
+            await req
+                .post(`${auth}/login`)
+                .send({loginOrEmail: user.login, password: user.password, deviceId: terminatedDeviceId})
+                .expect(HTTP_STATUSES.OK_200);
+
+            await req
+                .post(`${auth}/login`)
+                .send({loginOrEmail: user.login, password: user.password, deviceId: currentDeviceId})
+                .expect(HTTP_STATUSES.OK_200);
+
+            await req
+                .delete(`${security}/devices/${terminatedDeviceId}`)
+                .expect(HTTP_STATUSES.NO_CONTENT_204);
+
+            const res = await req
+                .get(`${security}/devices`)
+                .expect(HTTP_STATUSES.OK_200);
+
+            expect(res.body.some((s: {deviceId: string}) => s.deviceId === terminatedDeviceId)).toBe(false);
+            expect(res.body.some((s: {deviceId: string}) => s.deviceId === currentDeviceId)).toBe(true);
+        });
     });
 });

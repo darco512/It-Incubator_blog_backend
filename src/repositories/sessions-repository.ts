@@ -48,8 +48,16 @@ export const sessionsRepository = {
         return r.matchedCount > 0;
     },
 
-    async deleteByUserAndDevice(userId: ObjectId, deviceId: string): Promise<void> {
-        await sessionsCollection.deleteOne({userId, deviceId});
+    async deleteByUserAndDevice(
+        userId: ObjectId,
+        deviceId: string,
+        iatSeconds?: number,
+    ): Promise<void> {
+        const filter: {userId: ObjectId; deviceId: string; iat?: Date} = {userId, deviceId}
+        if (iatSeconds !== undefined) {
+            filter.iat = new Date(iatSeconds * 1000)
+        }
+        await sessionsCollection.deleteOne(filter);
     },
 
     async deleteByUser(userId: ObjectId): Promise<void> {
