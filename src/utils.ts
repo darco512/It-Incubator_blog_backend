@@ -20,6 +20,15 @@ export function getParamId(id: string | string[] | undefined): string {
     return id || '';
 }
 
+export function getRefreshCookieOptions(req: Request): {httpOnly: true; secure: boolean} {
+    const isSecureConnection =
+        req.secure || req.get("x-forwarded-proto") === "https";
+    return {
+        httpOnly: true,
+        secure: isSecureConnection,
+    };
+}
+
 export function getClientIp(req: Request): string {
     const forwarded = req.headers["x-forwarded-for"];
     if (typeof forwarded === "string" && forwarded.length > 0) {

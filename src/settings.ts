@@ -9,6 +9,7 @@ export const SETTINGS = {
         POSTS: '/posts',
         TESTS: '/testing/all-data',
         AUTH: '/auth',
+        SECURITY: '/security',
         USERS: '/users',
         COMMENTS: '/comments',
         RAQUESTS: '/requests',

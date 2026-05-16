@@ -56,6 +56,10 @@ export const sessionsRepository = {
         await sessionsCollection.deleteMany({userId});
     },
 
+    async deleteOtherSessions(userId: ObjectId, currentDeviceId: string): Promise<void> {
+        await sessionsCollection.deleteMany({userId, deviceId: {$ne: currentDeviceId}});
+    },
+
     async deleteExpiredSessions(now: Date = new Date()): Promise<number> {
         const r = await sessionsCollection.deleteMany({exp: {$lt: now}});
         return r.deletedCount ?? 0;

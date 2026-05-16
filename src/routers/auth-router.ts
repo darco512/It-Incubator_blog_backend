@@ -5,7 +5,7 @@ import {rateLimitMiddleware} from "../middlewares/rate-limit-middleware";
 import {authInputsValidation} from "../input-output-types/auth-input-validations";
 import {userInputsValidation} from "../input-output-types/user-input-validations";
 import {authService} from '../domain/auth-service'
-import {HTTP_STATUSES, getClientIp} from "../utils";
+import {HTTP_STATUSES, getClientIp, getRefreshCookieOptions} from "../utils";
 import {jwtService} from "../application/jwt-service";
 import {authMiddleware} from "../middlewares/auth-middleware";
 import {usersQueriesRepository} from "../repositories/users-queries-repository";
@@ -53,7 +53,7 @@ authRouter.post('/login',
                 exp: times.exp,
             })
         }
-        res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true});
+        res.cookie('refreshToken', refreshToken, getRefreshCookieOptions(req));
         res.status(HTTP_STATUSES.OK_200).send({accessToken, deviceId})
     } else {
         res.status(HTTP_STATUSES.UNAUTHORIZED_401).send({errorsMessages: [{
@@ -101,7 +101,7 @@ authRouter.post('/refresh-token',
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
-        res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: true });
+        res.cookie('refreshToken', refreshToken, getRefreshCookieOptions(req));
         res.status(HTTP_STATUSES.OK_200).send({ accessToken });
     })
 
@@ -197,7 +197,7 @@ authRouter.post('/logout',
             return;
         }
         await sessionsRepository.deleteByUserAndDevice(payload.userId, payload.deviceId);
-        res.clearCookie('refreshToken', { httpOnly: true, secure: true });
+        res.clearCookie('refreshToken', getRefreshCookieOptions(req));
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     })
 

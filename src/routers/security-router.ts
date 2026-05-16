@@ -1,6 +1,7 @@
 import {Request, Response, Router} from "express";
 import {refreshAuthMiddleware} from "../middlewares/refresh-auth-middleware";
 import {securityService} from "../domain/security-service";
+import {jwtService} from "../application/jwt-service";
 import {HTTP_STATUSES} from "../utils";
 
 export const securityRouter = Router();
@@ -26,7 +27,15 @@ securityRouter.delete(
             res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
             return;
         }
-        await securityService.deleteSessions(req.user._id);
+        const refreshToken = req.cookies?.refreshToken;
+        const payload = refreshToken
+            ? await jwtService.getRefreshTokenPayload(refreshToken)
+            : null;
+        if (!payload) {
+            res.sendStatus(HTTP_STATUSES.UNAUTHORIZED_401);
+            return;
+        }
+        await securityService.deleteOtherSessions(req.user._id, payload.deviceId);
         res.sendStatus(HTTP_STATUSES.NO_CONTENT_204);
     },
 );

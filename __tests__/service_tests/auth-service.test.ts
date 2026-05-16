@@ -21,7 +21,7 @@ describe("integration tests for AuthService", () => {
         
         initCollectionsFromMongoose(mongoose.connection);
 
-        jest.spyOn(EmailAdapter, 'sendEmail').mockResolvedValue(undefined);
+        jest.spyOn(EmailAdapter, 'sendEmail').mockResolvedValue({} as never);
     });
 
     afterAll(async () => {
@@ -108,7 +108,7 @@ describe("integration tests for AuthService", () => {
             let user = createUser("supercode", addMinutes(new Date(), -1), "email@email.email");
             await userCollection.insertOne(user)
 
-            const result = await authService.confirmEmail("supercode", "email@email.email")
+            const result = await authService.confirmEmail("supercode")
             const userModel = await userCollection.findOne({_id: user._id})
 
             expect(result).toBe(false)
@@ -119,8 +119,7 @@ describe("integration tests for AuthService", () => {
             await userCollection.insertOne(user)
 
             const spy = jest.spyOn(usersRepository, "updateConfirmation")
-            const result = await authService.confirmEmail(user.emailConfirmation.confirmationCode + "trash",
-                user.email)
+            const result = await authService.confirmEmail(user.emailConfirmation.confirmationCode + "trash")
 
             expect(result).toBe(false)
             expect(spy).not.toHaveBeenCalled()
@@ -130,7 +129,7 @@ describe("integration tests for AuthService", () => {
             let user = createUser("goodcode", addMinutes(new Date(), 60), "emailforgoodcode@email.email");
             await userCollection.insertOne(user)
 
-            const result = await authService.confirmEmail("goodcode", "emailforgoodcode@email.email")
+            const result = await authService.confirmEmail("goodcode")
             const userModel = await userCollection.findOne({_id: user._id})
 
             expect(result).toBeTruthy()

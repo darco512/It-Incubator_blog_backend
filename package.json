@@ -8,8 +8,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "yarn nodemon --inspect dist/index.js",
-    "jest": "jest -i",
-    "jest:coverage": "jest -i --coverage"
+    "jest": "node --use-system-ca ./node_modules/jest/bin/jest.js -i",
+    "jest:coverage": "node --use-system-ca ./node_modules/jest/bin/jest.js -i --coverage"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

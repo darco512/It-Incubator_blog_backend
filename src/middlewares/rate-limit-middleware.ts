@@ -9,6 +9,18 @@ function getRequestUrl(req: Request): string {
 }
 
 export const rateLimitMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+    if (req.headers["x-rate-limit-checked"] === "1") {
+        next();
+        return;
+    }
+    req.headers["x-rate-limit-checked"] = "1";
+
+    const URL = getRequestUrl(req);
+    if (URL.startsWith(SETTINGS.PATH.TESTS)) {
+        next();
+        return;
+    }
+
     const dbOk = await runDB(SETTINGS.MONGO_URL);
     if (!dbOk) {
         res.sendStatus(503);
@@ -16,7 +28,6 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
     }
 
     const IP = getClientIp(req);
-    const URL = getRequestUrl(req);
     const date = new Date();
 
     await requestCollection.insertOne({IP, URL, date});

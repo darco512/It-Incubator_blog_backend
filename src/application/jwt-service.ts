@@ -10,11 +10,10 @@ export const jwtService = {
     },
 
     async createRefreshJWT(user: UserDBType, deviceId: string) {
-        const iat = Math.floor(Date.now() / 1000)
         return jwt.sign(
-            {userId: user._id.toString(), deviceId, iat},
+            {userId: user._id.toString(), deviceId},
             SETTINGS.JWT_SECRET,
-            {expiresIn: '20s', noTimestamp: true},
+            {expiresIn: '20s'},
         )
     },
 

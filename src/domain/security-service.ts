@@ -6,8 +6,8 @@ export const securityService = {
     async findSessionsByUserId(userId: ObjectId): Promise<UserDeviceSessionViewType[]> {
         return sessionsRepository.findSessionsByUserId(userId);
     },
-    async deleteSessions(userId: ObjectId){
-        return await sessionsRepository.deleteByUser(userId);
+    async deleteOtherSessions(userId: ObjectId, currentDeviceId: string){
+        return await sessionsRepository.deleteOtherSessions(userId, currentDeviceId);
     },
 
     async deleteSession(userId: ObjectId, deviceId: string){
@@ -18,7 +18,7 @@ export const securityService = {
         if (device.userId.toString() !== userId.toString()) {
             return false;
         }
-        
+
         return await sessionsRepository.deleteByUserAndDevice(userId, deviceId);
     },
 }

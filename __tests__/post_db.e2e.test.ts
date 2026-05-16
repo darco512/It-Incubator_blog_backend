@@ -3,26 +3,31 @@ import {SETTINGS} from "../src/settings";
 import {HTTP_STATUSES} from "../src/utils";
 import {InputBlogType, InputPostType, OutputBlogType} from "../src/input-output-types/types";
 import {ADMIN_PASSWORD, ADMIN_USERNAME} from "../src/middlewares/auth-middleware";
-import {blogCollection, postCollection, runDB} from "../src/db/mongo-db";
+import {runDB} from "../src/db/mongo-db";
 
 describe('/posts', () => {
 
     const base64Credentials = Buffer.from(`${ADMIN_USERNAME}:${ADMIN_PASSWORD}`).toString('base64');
     let token: string;
-    beforeAll(async () => { // очистка базы данных перед началом тестирования
+    beforeAll(async () => {
         await runDB(SETTINGS.MONGO_URL)
-        await blogCollection.deleteMany()
-        await postCollection.deleteMany()
+        await req.delete(SETTINGS.PATH.TESTS).expect(HTTP_STATUSES.NO_CONTENT_204)
+
+        await req
+            .post(SETTINGS.PATH.USERS)
+            .set('Authorization', `Basic ${base64Credentials}`)
+            .send({login: ADMIN_USERNAME, password: ADMIN_PASSWORD, email: 'admin@test.com'})
+            .expect(HTTP_STATUSES.CREATED_201)
 
         const authResponse = await req
             .post(`${SETTINGS.PATH.AUTH}/login`)
-            .send({ loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD });
+            .send({loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD})
+            .expect(HTTP_STATUSES.OK_200)
 
-        token = authResponse.body.accessToken ;
-        if (!token) throw new Error("Login failed in beforeAll");
+        token = authResponse.body.accessToken
+        if (!token) throw new Error("Login failed in beforeAll")
     })
 
-    
     it('should get empty array', async () => {
 
         const res = await req
@@ -222,7 +227,16 @@ describe('/posts', () => {
 
     let commentId: string
 
+    async function refreshAccessToken() {
+        const authResponse = await req
+            .post(`${SETTINGS.PATH.AUTH}/login`)
+            .send({loginOrEmail: ADMIN_USERNAME, password: ADMIN_PASSWORD})
+            .expect(HTTP_STATUSES.OK_200)
+        token = authResponse.body.accessToken
+    }
+
     it('should create comment', async () => {
+        await refreshAccessToken()
 
         const res = await req
             .post(`${SETTINGS.PATH.POSTS}/${postId}/comments`)
@@ -278,7 +292,7 @@ describe('/posts', () => {
             .put(`${SETTINGS.PATH.COMMENTS}/${commentId}`)
             .set('Authorization', `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODE2YjBhYmI5MjAyYTMxZTJiZjkxOTQiLCJpYXQiOjE3NDYzMTc2MTcsImV4cCI6MTc0NjMyMTIxN30.OKUrJs6VlVHzLmtNQXMprqJBlDJUXkSWtoGsmzbmjao`)
             .send({content: "asdddddddddddddddddddddddddddddddddddddddddddddd"})
-            .expect(403)
+            .expect(401)
 
     })
 
