@@ -35,7 +35,7 @@ export const authService = {
         const createResult = await usersRepository.createUser(newUser);
 
         const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(newUser)
-        EmailAdapter.sendEmail(newUser.email, 'Email confirmation', messageBody)
+        await EmailAdapter.sendEmail(newUser.email, 'Email confirmation', messageBody)
 
         return createResult
     },
@@ -81,7 +81,7 @@ export const authService = {
             user.emailConfirmation.expirationDate = newExpiration
             
             const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(user)
-            EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
+            await EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
             return true
         }
         return false
