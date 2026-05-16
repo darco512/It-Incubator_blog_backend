@@ -35,12 +35,7 @@ export const authService = {
         const createResult = await usersRepository.createUser(newUser);
 
         const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(newUser)
-        try {
-            await EmailAdapter.sendEmail(newUser.email, 'Email confirmation', messageBody)
-        } catch (error: any) {
-            console.error('❌ Failed to send email:', error.message)
-            // Don't fail registration if email fails
-        }
+        EmailAdapter.sendEmail(newUser.email, 'Email confirmation', messageBody)
 
         return createResult
     },
@@ -86,7 +81,7 @@ export const authService = {
             user.emailConfirmation.expirationDate = newExpiration
             
             const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(user)
-            await EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
+            EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
             return true
         }
         return false
