@@ -35,7 +35,12 @@ export const authService = {
         const createResult = await usersRepository.createUser(newUser);
 
         const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(newUser)
-        await EmailAdapter.sendEmail(newUser.email, 'Email confirmation', messageBody)
+        try {
+            await EmailAdapter.sendEmail(newUser.email, 'Email confirmation', messageBody)
+        } catch (error: any) {
+            console.error('❌ Failed to send email:', error.message)
+            // Don't fail registration if email fails
+        }
 
         return createResult
     },
@@ -69,19 +74,21 @@ export const authService = {
         let user = await usersRepository.findByLoginOrEmail(email);
         if (!user){ return false}
         if (!user.emailConfirmation.isConfirmed) {
-            // Generate NEW confirmation code
             const newCode = randomUUID()
             const newExpiration = addMinutes(new Date(), 3000)
             
-            // Update in database
             await usersRepository.updateConfirmationCode(user._id, newCode, newExpiration)
-            
-            // Update user object for email template
+        
             user.emailConfirmation.confirmationCode = newCode
             user.emailConfirmation.expirationDate = newExpiration
             
             const messageBody = EmailTemplatesManager.getEmailConfirmationMessage(user)
-            await EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
+            try {
+                await EmailAdapter.sendEmail(user.email, 'Email confirmation', messageBody)
+            } catch (error: any) {
+                console.error('❌ Failed to send email:', error.message)
+                // Don't fail registration if email fails
+            }
             return true
         }
         return false
